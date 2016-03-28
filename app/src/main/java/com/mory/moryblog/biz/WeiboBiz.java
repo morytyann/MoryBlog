@@ -1,15 +1,15 @@
 package com.mory.moryblog.biz;
 
 import android.content.Context;
+import android.os.Message;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 
+import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.entity.Weibo;
 import com.mory.moryblog.util.Constant;
 import com.mory.moryblog.util.SettingKeeper;
-import com.sina.weibo.sdk.exception.WeiboException;
 import com.sina.weibo.sdk.net.AsyncWeiboRunner;
-import com.sina.weibo.sdk.net.RequestListener;
 import com.sina.weibo.sdk.net.WeiboParameters;
 
 import org.json.JSONArray;
@@ -28,38 +28,55 @@ import java.util.ArrayList;
  * 5.删除微博
  */
 public class WeiboBiz {
-    public static ArrayList<Weibo> loadWeibo(Context c) {
+    /**
+     * 初次加载微博
+     *
+     * @param activity 上下文
+     * @return 微博列表
+     */
+    public static ArrayList<Weibo> loadWeibo(MainActivity activity) {
         final ArrayList<Weibo> weibos = new ArrayList<>();
-        AsyncWeiboRunner runner = new AsyncWeiboRunner(c);
+        AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
         WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
-        params.put("access_token", SettingKeeper.readAccessToken(c).getToken());
-        runner.requestAsync(Constant.HOME_TIMELINE, params, "GET", new RequestListener() {
-            @Override
-            public void onComplete(String s) {
-                try {
-                    JSONObject jObject = new JSONObject(s);
-                    if (!jObject.has("statuses")) {
-                        return;
-                    }
-                    JSONArray jArray = jObject.getJSONArray("statuses");
-                    for (int i = 0; i < jArray.length(); i++) {
-                        JSONObject weiboObject = jArray.getJSONObject(i);
-                        weibos.add(getWeibo(weiboObject));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
+        String s = runner.request(Constant.HOME_TIMELINE, params, "GET");
+        try {
+            JSONObject jObject = new JSONObject(s);
+            if (!jObject.has("statuses")) {
+                return null;
+            } else {
+                JSONArray jArray = jObject.getJSONArray("statuses");
+                for (int i = 0; i < jArray.length(); i++) {
+                    weibos.add(getWeibo(jArray.getJSONObject(i)));
                 }
             }
-
-            @Override
-            public void onWeiboException(WeiboException e) {
-                Log.d(Constant.TAG, "onWeiboException: " + e.getLocalizedMessage());
-            }
-        });
-        if (weibos.size() > 0) {
-            return weibos;
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        return null;
+        return weibos;
+    }
+
+    /**
+     * 更新微博列表（加载最新Or加载更多）
+     *
+     * @param activity 上下文
+     * @param weibos   微博列表
+     * @param type     类型 {@link Constant}
+     */
+    public static void loadWeibo(MainActivity activity, ArrayList<Weibo> weibos, String type) {
+        Message msg = new Message();
+        switch (type) {
+            case Constant.LOAD_MORE:
+                msg.what = Constant.SUCCESS;
+                activity.mHandler.sendMessage(msg);
+                break;
+            case Constant.LOAD_NEW:
+                msg.what = Constant.SUCCESS;
+                activity.mHandler.sendMessage(msg);
+                break;
+            default:
+                break;
+        }
     }
 
     @NonNull
@@ -85,10 +102,11 @@ public class WeiboBiz {
         }
         if (weiboObject.has("pic_urls")) {
             JSONArray picArray = weiboObject.getJSONArray("pic_urls");
-            ArrayList<String> pic_urls = new ArrayList<String>();
+            ArrayList<String> pic_urls = new ArrayList<>();
             for (int j = 0; j < picArray.length(); j++) {
                 pic_urls.add(picArray.getJSONObject(j).getString("thumbnail_pic"));
             }
+            weibo.setPic_urls(pic_urls);
         }
         if (weiboObject.has("favorited")) {
             weibo.setFavorited(weiboObject.getBoolean("favorited"));

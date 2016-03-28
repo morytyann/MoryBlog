@@ -27,5 +27,28 @@ public class Constant {
      */
     public static final String TAG = "MoryBlog";
 
+    /**
+     * 加载微博的URL
+     */
     public static final String HOME_TIMELINE = "https://api.weibo.com/2/statuses/home_timeline.json";
+
+    /**
+     * 加载更多
+     */
+    public static final String LOAD_MORE = "MORE";
+
+    /**
+     * 加载最新
+     */
+    public static final String LOAD_NEW = "NEW";
+
+    /**
+     * 成功
+     */
+    public static final int SUCCESS = 1827;
+
+    /**
+     * 失败
+     */
+    public static final int FAILED = 4;
 }
