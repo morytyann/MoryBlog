@@ -1,6 +1,8 @@
 package com.mory.moryblog.biz;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.mory.moryblog.entity.Weibo;
 import com.mory.moryblog.util.Constant;
@@ -27,7 +29,7 @@ import java.util.ArrayList;
  */
 public class WeiboBiz {
     public static ArrayList<Weibo> loadWeibo(Context c) {
-        ArrayList<Weibo> weibos = new ArrayList<>();
+        final ArrayList<Weibo> weibos = new ArrayList<>();
         AsyncWeiboRunner runner = new AsyncWeiboRunner(c);
         WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
         params.put("access_token", SettingKeeper.readAccessToken(c).getToken());
@@ -42,13 +44,7 @@ public class WeiboBiz {
                     JSONArray jArray = jObject.getJSONArray("statuses");
                     for (int i = 0; i < jArray.length(); i++) {
                         JSONObject weiboObject = jArray.getJSONObject(i);
-                        Weibo weibo = new Weibo();
-                        if (weiboObject.has("created_at")) {
-                            weibo.setCreated_at(weiboObject.getString("created_at"));
-                        }
-                        if (weiboObject.has("text")) {
-                            weibo.setText(weiboObject.getString("text"));
-                        }
+                        weibos.add(getWeibo(weiboObject));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -57,12 +53,58 @@ public class WeiboBiz {
 
             @Override
             public void onWeiboException(WeiboException e) {
-
+                Log.d(Constant.TAG, "onWeiboException: " + e.getLocalizedMessage());
             }
         });
         if (weibos.size() > 0) {
             return weibos;
         }
         return null;
+    }
+
+    @NonNull
+    private static Weibo getWeibo(JSONObject weiboObject) throws JSONException {
+        Weibo weibo = new Weibo();
+        if (weiboObject.has("created_at")) {
+            weibo.setCreated_at(weiboObject.getString("created_at"));
+        }
+        if (weiboObject.has("text")) {
+            weibo.setText(weiboObject.getString("text"));
+        }
+        if (weiboObject.has("idstr")) {
+            weibo.setIdString(weiboObject.getString("idstr"));
+        }
+        if (weiboObject.has("reposts_count")) {
+            weibo.setReposts_count(weiboObject.getInt("reposts_count"));
+        }
+        if (weiboObject.has("comments_count")) {
+            weibo.setComments_count(weiboObject.getInt("comments_count"));
+        }
+        if (weiboObject.has("attitudes_count")) {
+            weibo.setAttitudes_count(weiboObject.getInt("attitudes_count"));
+        }
+        if (weiboObject.has("pic_urls")) {
+            JSONArray picArray = weiboObject.getJSONArray("pic_urls");
+            ArrayList<String> pic_urls = new ArrayList<String>();
+            for (int j = 0; j < picArray.length(); j++) {
+                pic_urls.add(picArray.getJSONObject(j).getString("thumbnail_pic"));
+            }
+        }
+        if (weiboObject.has("favorited")) {
+            weibo.setFavorited(weiboObject.getBoolean("favorited"));
+        }
+        if (weiboObject.has("truncated")) {
+            weibo.setTruncated(weiboObject.getBoolean("truncated"));
+        }
+        if (weiboObject.has("source")) {
+            weibo.setSource(weiboObject.getString("source"));
+        }
+        if (weiboObject.has("retweeted_status")) {
+            weibo.setRetweeted_status(getWeibo(weiboObject.getJSONObject("retweeted_status")));
+        }
+        if (weiboObject.has("user")) {
+            weibo.setUser(UserBiz.getUser(weiboObject.getJSONObject("user")));
+        }
+        return weibo;
     }
 }

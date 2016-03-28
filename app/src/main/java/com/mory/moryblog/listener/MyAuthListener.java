@@ -34,6 +34,7 @@ public class MyAuthListener implements WeiboAuthListener {
         Oauth2AccessToken token = Oauth2AccessToken.parseAccessToken(bundle);
         if (token.isSessionValid()) {
             SettingKeeper.writeAccessToken(activity, token);
+            Log.d(Constant.TAG, "onComplete: " + token.getToken());
             activity.initWeiboList();
         } else {
             String code = bundle.getString("code");

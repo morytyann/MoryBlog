@@ -29,6 +29,8 @@ public class Weibo {
     private int comments_count;
     // 点赞数
     private int attitudes_count;
+    // 图片地址（官方坑爹系列，其它的地址字段只返回第一张，如果要看其他图的大图，把地址中的thumbnail换成其他的再下载就行了）
+    private ArrayList<String> pic_urls;
     // 缩略图片地址，没有时不返回此字段
     private ArrayList<String> thumbnail_pic;
     // 中等尺寸图片地址，没有时不返回此字段
@@ -194,5 +196,13 @@ public class Weibo {
 
     public User getUser() {
         return user;
+    }
+
+    public void setPic_urls(ArrayList<String> pic_urls) {
+        this.pic_urls = pic_urls;
+    }
+
+    public ArrayList<String> getPic_urls() {
+        return pic_urls;
     }
 }

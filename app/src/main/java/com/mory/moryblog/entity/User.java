@@ -9,6 +9,8 @@ public class User {
     private String created_at;
     // UID
     private int id;
+    // UID（字符串）
+    private String idString;
     // 昵称
     private String screen_name;
     // 友好名称
@@ -37,10 +39,10 @@ public class User {
     private int followers_count;
     // 关注数
     private int friends_count;
-    // 微博数
-    private int statuses_count;
     // 收藏数
     private int favourites_count;
+    // 微博数
+    private int statuses_count;
     // 互粉数
     private int bi_followers_count;
     // 在线状态，0：不在线、1：在线
@@ -193,7 +195,7 @@ public class User {
         this.following = following;
     }
 
-    public boolean getFollowing() {
+    public boolean isFollowing() {
         return this.following;
     }
 
@@ -201,7 +203,7 @@ public class User {
         this.allow_all_act_msg = allow_all_act_msg;
     }
 
-    public boolean getAllow_all_act_msg() {
+    public boolean isAllow_all_act_msg() {
         return this.allow_all_act_msg;
     }
 
@@ -217,7 +219,7 @@ public class User {
         this.geo_enabled = geo_enabled;
     }
 
-    public boolean getGeo_enabled() {
+    public boolean isGeo_enabled() {
         return this.geo_enabled;
     }
 
@@ -225,7 +227,7 @@ public class User {
         this.verified = verified;
     }
 
-    public boolean getVerified() {
+    public boolean isVerified() {
         return this.verified;
     }
 
@@ -233,7 +235,7 @@ public class User {
         this.allow_all_comment = allow_all_comment;
     }
 
-    public boolean getAllow_all_comment() {
+    public boolean isAllow_all_comment() {
         return this.allow_all_comment;
     }
 
@@ -257,7 +259,7 @@ public class User {
         this.follow_me = follow_me;
     }
 
-    public boolean getFollow_me() {
+    public boolean isFollow_me() {
         return this.follow_me;
     }
 
@@ -275,5 +277,13 @@ public class User {
 
     public int getBi_followers_count() {
         return this.bi_followers_count;
+    }
+
+    public void setIdString(String idString) {
+        this.idString = idString;
+    }
+
+    public String getIdString() {
+        return idString;
     }
 }
