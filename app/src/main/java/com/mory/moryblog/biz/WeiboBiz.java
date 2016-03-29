@@ -1,9 +1,7 @@
 package com.mory.moryblog.biz;
 
-import android.content.Context;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.entity.Weibo;
@@ -35,7 +33,7 @@ public class WeiboBiz {
      * @return 微博列表
      */
     public static ArrayList<Weibo> loadWeibo(MainActivity activity) {
-        final ArrayList<Weibo> weibos = new ArrayList<>();
+        ArrayList<Weibo> weibos = new ArrayList<>();
         AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
         WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
         params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
@@ -63,16 +61,45 @@ public class WeiboBiz {
      * @param weibos   微博列表
      * @param type     类型 {@link Constant}
      */
-    public static void loadWeibo(MainActivity activity, ArrayList<Weibo> weibos, String type) {
-        Message msg = new Message();
+    synchronized public static void refreshWeibo(MainActivity activity, ArrayList<Weibo> weibos, String type) {
+        if (weibos == null) {
+            return;
+        }
         switch (type) {
             case Constant.LOAD_MORE:
-                msg.what = Constant.SUCCESS;
-                activity.mHandler.sendMessage(msg);
+                sendLoadSuccessMsg(activity);
                 break;
             case Constant.LOAD_NEW:
-                msg.what = Constant.SUCCESS;
-                activity.mHandler.sendMessage(msg);
+                ArrayList<Weibo> newWeibos = new ArrayList<>();
+                AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
+                WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
+                params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
+                params.put("since_id", weibos.get(0).getIdString());
+                String s = runner.request(Constant.HOME_TIMELINE, params, "GET");
+                try {
+                    JSONObject jObject = new JSONObject(s);
+                    if (!jObject.has("statuses")) {
+                        sendLoadFailedMsg(activity);
+                        return;
+                    } else {
+                        JSONArray jArray = jObject.getJSONArray("statuses");
+                        if (jArray.length() == 0) {
+                            sendLoadNoNewMsg(activity);
+                            return;
+                        }
+                        for (int i = 0; i < jArray.length(); i++) {
+                            newWeibos.add(getWeibo(jArray.getJSONObject(i)));
+                        }
+                        newWeibos.addAll(weibos);
+                        weibos.clear();
+                        weibos.addAll(newWeibos);
+                        newWeibos.clear();
+                        sendLoadSuccessMsg(activity);
+                    }
+                } catch (JSONException e) {
+                    sendLoadFailedMsg(activity);
+                    e.printStackTrace();
+                }
                 break;
             default:
                 break;
@@ -124,5 +151,23 @@ public class WeiboBiz {
             weibo.setUser(UserBiz.getUser(weiboObject.getJSONObject("user")));
         }
         return weibo;
+    }
+
+    private static void sendLoadNoNewMsg(MainActivity activity) {
+        Message msg = new Message();
+        msg.what = Constant.FRESH_NO_NEW;
+        activity.mHandler.sendMessage(msg);
+    }
+
+    private static void sendLoadSuccessMsg(MainActivity activity) {
+        Message msg = new Message();
+        msg.what = Constant.FRESH_SUCCESS;
+        activity.mHandler.sendMessage(msg);
+    }
+
+    private static void sendLoadFailedMsg(MainActivity activity) {
+        Message msg = new Message();
+        msg.what = Constant.FRESH_FAILED;
+        activity.mHandler.sendMessage(msg);
     }
 }

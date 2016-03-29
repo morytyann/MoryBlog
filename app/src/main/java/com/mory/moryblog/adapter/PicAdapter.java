@@ -2,18 +2,14 @@ package com.mory.moryblog.adapter;
 
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.mory.moryblog.R;
-import com.mory.moryblog.util.Constant;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -22,7 +18,6 @@ import java.util.ArrayList;
  * 自定义adapter用于显示图片
  */
 public class PicAdapter extends BaseAdapter {
-    private ImageLoader loader;
     private AppCompatActivity activity;
     private ArrayList<String> pic_urls;
     private LayoutInflater inflater;
@@ -33,10 +28,6 @@ public class PicAdapter extends BaseAdapter {
         this.pic_urls = pic_urls;
         this.resource = resource;
         this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        loader = ImageLoader.getInstance();
-        if (!loader.isInited()) {
-            loader.init(ImageLoaderConfiguration.createDefault(activity));
-        }
     }
 
     @Override
@@ -65,7 +56,7 @@ public class PicAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        loader.displayImage(pic_urls.get(position), holder.imageView);
+        Picasso.with(activity).load(pic_urls.get(position)).into(holder.imageView);
         return convertView;
     }
 

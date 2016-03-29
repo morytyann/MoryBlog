@@ -43,12 +43,27 @@ public class Constant {
     public static final String LOAD_NEW = "NEW";
 
     /**
-     * 成功
+     * 刷新失败
      */
-    public static final int SUCCESS = 1827;
+    public static final int FRESH_FAILED = 0;
 
     /**
-     * 失败
+     * 刷新成功
      */
-    public static final int FAILED = 4;
+    public static final int FRESH_SUCCESS = 1;
+
+    /**
+     * 刷新成功但没有新微博
+     */
+    public static final int FRESH_NO_NEW = 2;
+
+    /**
+     * 正在刷新
+     */
+    public static final int FRESHING = 3;
+
+    /**
+     * 是否正在刷新
+     */
+    public static boolean IS_FRESHING = false;
 }

@@ -1,26 +1,26 @@
 package com.mory.moryblog.adapter;
 
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mory.moryblog.R;
+import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.entity.User;
 import com.mory.moryblog.entity.Weibo;
-import com.mory.moryblog.util.Constant;
-import com.mory.moryblog.view.MyGridView;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.mory.moryblog.listener.OnPicClickListener;
+import com.mory.moryblog.util.StringUtil;
+import com.squareup.picasso.Picasso;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -32,10 +32,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> {
     private int resource;
     private ArrayList<Weibo> weibos;
-    private AppCompatActivity activity;
+    private MainActivity activity;
     private LayoutInflater inflater;
+    private int weiboGridLayoutwholeWidth = 750;
+    private int retweetGridLayoutWidth = 750;
 
-    public WeiboAdapter(AppCompatActivity activity, ArrayList<Weibo> weibos, int resource) {
+    public WeiboAdapter(MainActivity activity, ArrayList<Weibo> weibos, int resource) {
         this.weibos = weibos;
         this.resource = resource;
         this.activity = activity;
@@ -68,57 +70,62 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        if (position == 0) {
+            Point p = new Point();
+            activity.getWindowManager().getDefaultDisplay().getSize(p);
+            retweetGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd() + holder.llRetweet.getPaddingStart() + holder.llRetweet.getPaddingEnd());
+            weiboGridLayoutwholeWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd());
+        }
         Weibo weibo = weibos.get(position);
         Weibo retweet = weibo.getRetweeted_status();
         User user = weibo.getUser();
-        ImageLoader loader = ImageLoader.getInstance();
-        if (!loader.isInited()) {
-            loader.init(ImageLoaderConfiguration.createDefault(activity));
-        }
-        loader.displayImage(user.getAvatar_large(), holder.civUserAvatar);
+        Picasso.with(activity).load(user.getAvatar_large()).into(holder.civUserAvatar);
         holder.tvUserName.setText(user.getName());
-        holder.tvCreateAt.setText(weibo.getCreated_at());
+        try {
+            holder.tvCreateAt.setText(StringUtil.getReadableTime(weibo.getCreated_at()));
+        } catch (ParseException e) {
+            holder.tvCreateAt.setText(weibo.getCreated_at());
+            e.printStackTrace();
+        }
         holder.tvText.setText(weibo.getText());
         holder.tvThumbUpCount.setText(weibo.getAttitudes_count() + "");
         holder.tvCommentCount.setText(weibo.getComments_count() + "");
         holder.tvRetweetCount.setText(weibo.getReposts_count() + "");
+        holder.glPics.removeAllViews();
+        holder.glRetweetPics.removeAllViews();
         if (retweet != null) {
             holder.llRetweet.setVisibility(View.VISIBLE);
-            holder.gvPics.setVisibility(View.GONE);
-            holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：" + retweet.getText());
+            holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：\n" + retweet.getText());
             holder.tvAllCount.setText(retweet.getComments_count() + "评论|" + retweet.getReposts_count() + "转发|" + retweet.getAttitudes_count() + "赞");
             ArrayList<String> pic_urls = retweet.getPic_urls();
             if (pic_urls != null && pic_urls.size() > 0) {
-                if (pic_urls.size() == 4) {
-                    holder.gvRetweetPics.setNumColumns(2);
+                for (int i = 0; i < pic_urls.size(); i++) {
+                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glRetweetPics, false);
+                    ViewGroup.LayoutParams params = view.getLayoutParams();
+                    params.width = retweetGridLayoutWidth / 3;
+                    params.height = retweetGridLayoutWidth / 3;
+                    view.setTag(R.id.tag_first, pic_urls);
+                    view.setTag(R.id.tag_second, i);
+                    view.setOnClickListener(new OnPicClickListener(activity));
+                    Picasso.with(activity).load(pic_urls.get(i)).resize(retweetGridLayoutWidth / 3, retweetGridLayoutWidth / 3).centerCrop().into(view);
+                    holder.glRetweetPics.addView(view);
                 }
-                holder.gvRetweetPics.setAdapter(new PicAdapter(activity, pic_urls, R.layout.grid_item_pic));
-//                for (int i = 0; i < pic_urls.size(); i++) {
-//                    Log.d(Constant.TAG, "onBindViewHolder: " + "RetweetLoadingPicture");
-//                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.gvRetweetPics, false);
-//                    loader.displayImage(pic_urls.get(i), view);
-//                    holder.gvRetweetPics.addView(view);
-//                }
-            } else {
-                holder.gvRetweetPics.setVisibility(View.GONE);
             }
         } else {
             holder.llRetweet.setVisibility(View.GONE);
             ArrayList<String> pic_urls = weibo.getPic_urls();
             if (pic_urls != null && pic_urls.size() > 0) {
-                holder.gvPics.setVisibility(View.VISIBLE);
-                if (pic_urls.size() == 4) {
-                    holder.gvPics.setNumColumns(2);
+                for (int i = 0; i < pic_urls.size(); i++) {
+                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glPics, false);
+                    ViewGroup.LayoutParams params = view.getLayoutParams();
+                    params.width = weiboGridLayoutwholeWidth / 3;
+                    params.height = weiboGridLayoutwholeWidth / 3;
+                    view.setTag(R.id.tag_first, pic_urls);
+                    view.setTag(R.id.tag_second, i);
+                    view.setOnClickListener(new OnPicClickListener(activity));
+                    Picasso.with(activity).load(pic_urls.get(i)).resize(weiboGridLayoutwholeWidth / 3, weiboGridLayoutwholeWidth / 3).centerCrop().into(view);
+                    holder.glPics.addView(view);
                 }
-                holder.gvPics.setAdapter(new PicAdapter(activity, pic_urls, R.layout.grid_item_pic));
-//                for (int i = 0; i < pic_urls.size(); i++) {
-//                    Log.d(Constant.TAG, "onBindViewHolder: " + "WeiboLoadingPicture");
-//                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.gvPics, false);
-//                    loader.displayImage(pic_urls.get(i), view);
-//                    holder.gvPics.addView(view);
-//                }
-            } else {
-                holder.gvPics.setVisibility(View.GONE);
             }
         }
     }
@@ -134,12 +141,13 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         public TextView tvText;
         public LinearLayout llRetweet;
         public TextView tvRetweetText;
-        public MyGridView gvRetweetPics;
+        public GridLayout glRetweetPics;
         public TextView tvAllCount;
-        public MyGridView gvPics;
+        public GridLayout glPics;
         public TextView tvThumbUpCount;
         public TextView tvCommentCount;
         public TextView tvRetweetCount;
+        public LinearLayout llContent;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -150,12 +158,13 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
             tvText = (TextView) itemView.findViewById(R.id.tvText);
             llRetweet = (LinearLayout) itemView.findViewById(R.id.llRetweet);
             tvRetweetText = (TextView) itemView.findViewById(R.id.tvRetweetText);
-            gvRetweetPics = (MyGridView) itemView.findViewById(R.id.gvRetweetPics);
+            glRetweetPics = (GridLayout) itemView.findViewById(R.id.glRetweetPics);
             tvAllCount = (TextView) itemView.findViewById(R.id.tvAllCount);
-            gvPics = (MyGridView) itemView.findViewById(R.id.gvPics);
+            glPics = (GridLayout) itemView.findViewById(R.id.glPics);
             tvThumbUpCount = (TextView) itemView.findViewById(R.id.tvThumbUpCount);
             tvCommentCount = (TextView) itemView.findViewById(R.id.tvCommentCount);
             tvRetweetCount = (TextView) itemView.findViewById(R.id.tvRetweetCount);
+            llContent = (LinearLayout) itemView.findViewById(R.id.llContent);
         }
     }
 }

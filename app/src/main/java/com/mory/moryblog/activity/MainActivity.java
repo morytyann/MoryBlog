@@ -42,14 +42,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RecyclerView rvWeibos;
     private ArrayList<Weibo> weibos;
     private SsoHandler handler;
+    private WeiboAdapter rvAdapter;
     public Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Constant.SUCCESS:
+                case Constant.FRESH_SUCCESS: // 刷新成功的消息
+                    Constant.IS_FRESHING = false;
                     srl.setRefreshing(false);
+                    rvAdapter.notifyDataSetChanged();
                     break;
-                case Constant.FAILED:
+                case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博的消息
+                    Constant.IS_FRESHING = false;
+                    srl.setRefreshing(false);
+                    Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
+                    break;
+                case Constant.FRESH_FAILED: // 刷新失败的消息
+                    Constant.IS_FRESHING = false;
+                    srl.setRefreshing(false);
+                    Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
+                    break;
+                case Constant.FRESHING: // 正在刷新的消息
+                    Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -89,15 +103,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (nav != null) {
             nav.setNavigationItemSelectedListener(this);
         }
+        // 初始化RecyclerView
+        rvWeibos.setLayoutManager(new LinearLayoutManager(this));
+        rvWeibos.setItemAnimator(new DefaultItemAnimator());
         // 下拉刷新的监听
         if (srl != null) {
             srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    WeiboBiz.loadWeibo(MainActivity.this, weibos, Constant.LOAD_NEW);
+                    if (Constant.IS_FRESHING) {
+                        Message msg = new Message();
+                        msg.what = Constant.FRESHING;
+                        mHandler.sendMessage(msg);
+                        return;
+                    }
+                    Constant.IS_FRESHING = true;
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            WeiboBiz.refreshWeibo(MainActivity.this, weibos, Constant.LOAD_NEW);
+                        }
+                    }.start();
                 }
             });
         }
+        // 加载更多
+
         // 设置侧边栏打开关闭旋钮
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -131,11 +162,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void run() {
                         if (weibos != null) {
-                            rvWeibos.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                            rvWeibos.setItemAnimator(new DefaultItemAnimator());
-                            rvWeibos.setAdapter(new WeiboAdapter(MainActivity.this, weibos, R.layout.list_item_weibo));
+                            rvAdapter = new WeiboAdapter(MainActivity.this, weibos, R.layout.list_item_weibo);
+                            rvWeibos.setAdapter(rvAdapter);
                         } else {
-                            Toast.makeText(MainActivity.this, "微博列表加载异常，请尝试重启APP。", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "微博列表加载异常...", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
