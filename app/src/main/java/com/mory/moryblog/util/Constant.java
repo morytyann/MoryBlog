@@ -27,5 +27,43 @@ public class Constant {
      */
     public static final String TAG = "MoryBlog";
 
+    /**
+     * 加载微博的URL
+     */
     public static final String HOME_TIMELINE = "https://api.weibo.com/2/statuses/home_timeline.json";
+
+    /**
+     * 加载更多
+     */
+    public static final String LOAD_MORE = "MORE";
+
+    /**
+     * 加载最新
+     */
+    public static final String LOAD_NEW = "NEW";
+
+    /**
+     * 刷新失败
+     */
+    public static final int FRESH_FAILED = 0;
+
+    /**
+     * 刷新成功
+     */
+    public static final int FRESH_SUCCESS = 1;
+
+    /**
+     * 刷新成功但没有新微博
+     */
+    public static final int FRESH_NO_NEW = 2;
+
+    /**
+     * 正在刷新
+     */
+    public static final int FRESHING = 3;
+
+    /**
+     * 是否正在刷新
+     */
+    public static boolean IS_FRESHING = false;
 }
