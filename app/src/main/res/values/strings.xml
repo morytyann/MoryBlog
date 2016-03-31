@@ -6,6 +6,6 @@
 
     <string name="action_settings">Settings</string>
     <string name="image_description">HelloWorld</string>
-    <item name="tag_first" type="id">0</item>
-    <item name="tag_second" type="id">1</item>
+    <item name="tag0" type="id">0</item>
+    <item name="tag_1" type="id">1</item>
 </resources>

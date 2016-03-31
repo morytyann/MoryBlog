@@ -1,6 +1,7 @@
 package com.mory.moryblog.listener;
 
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.mory.moryblog.R;
@@ -14,16 +15,16 @@ import java.util.ArrayList;
  * 监听查看大图的点击
  */
 public class OnPicClickListener implements View.OnClickListener {
-    private MainActivity activity;
+    private AppCompatActivity activity;
 
-    public OnPicClickListener(MainActivity activity) {
+    public OnPicClickListener(AppCompatActivity activity) {
         this.activity = activity;
     }
 
     @Override
     public void onClick(View v) {
-        ArrayList<String> pic_urls = (ArrayList<String>) v.getTag(R.id.tag_first);
-        int position = (int) v.getTag(R.id.tag_second);
+        ArrayList<String> pic_urls = (ArrayList<String>) v.getTag(R.id.tag0);
+        int position = (int) v.getTag(R.id.tag_1);
         activity.startActivity(new Intent(activity, PhotoActivity.class).putExtra("position", position).putStringArrayListExtra("pic_urls", pic_urls));
     }
 }

@@ -2,12 +2,8 @@ package com.mory.moryblog.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -46,34 +42,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private SwipeRefreshLayout srl;
     private RecyclerView rvWeibos;
-    private ArrayList<Weibo> weibos;
     private SsoHandler handler;
     private WeiboAdapter rvAdapter;
-    public Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Constant.FRESH_SUCCESS: // 刷新成功的消息
-                    Constant.IS_FRESHING = false;
-                    srl.setRefreshing(false);
-                    rvAdapter.notifyDataSetChanged();
-                    break;
-                case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博的消息
-                    Constant.IS_FRESHING = false;
-                    srl.setRefreshing(false);
-                    Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
-                    break;
-                case Constant.FRESH_FAILED: // 刷新失败的消息
-                    Constant.IS_FRESHING = false;
-                    srl.setRefreshing(false);
-                    Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
-                    break;
-                case Constant.FRESHING: // 正在刷新的消息
-                    Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     private void setViews() {
         // findViewById
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         NavigationView nav = (NavigationView) findViewById(R.id.nav_view);
         srl = (SwipeRefreshLayout) findViewById(R.id.srl);
@@ -123,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Observable.create(new Observable.OnSubscribe<Integer>() {
                         @Override
                         public void call(Subscriber<? super Integer> subscriber) {
-                            subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, weibos, Constant.LOAD_NEW));
+                            subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.LOAD_NEW));
+                            subscriber.onCompleted();
                         }
                     })
                             .observeOn(AndroidSchedulers.mainThread())
@@ -131,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             .subscribe(new Subscriber<Integer>() {
                                 @Override
                                 public void onCompleted() {
+                                    Constant.IS_FRESHING = false;
                                     Log.d(Constant.TAG, "onCompleted: " + "OK");
                                 }
 
@@ -144,18 +116,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 public void onNext(Integer integer) {
                                     switch (integer) {
                                         case Constant.FRESH_SUCCESS: // 刷新成功的消息
-                                            Constant.IS_FRESHING = false;
                                             srl.setRefreshing(false);
                                             rvAdapter.notifyDataSetChanged();
                                             break;
                                         case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博的消息
-                                            Constant.IS_FRESHING = false;
                                             srl.setRefreshing(false);
                                             Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
                                             break;
                                         case Constant.FRESH_FAILED: // 刷新失败的消息
-                                            Constant.IS_FRESHING = false;
-                                            srl.setRefreshing(false);
                                             Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
                                             break;
                                         case Constant.FRESHING: // 正在刷新的消息
@@ -188,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * 初始化微博列表
      */
     public void initWeiboList() {
-        weibos = new ArrayList<>();
         Observable.create(new Observable.OnSubscribe<ArrayList<Weibo>>() {
             @Override
             public void call(Subscriber<? super ArrayList<Weibo>> subscriber) {
@@ -201,9 +168,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new Action1<ArrayList<Weibo>>() {
                     @Override
                     public void call(ArrayList<Weibo> weibos) {
-                        MainActivity.this.weibos.clear();
-                        MainActivity.this.weibos.addAll(weibos);
-                        MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, MainActivity.this.weibos, R.layout.list_item_weibo);
+                        if (Constant.weibos == null) {
+                            Constant.weibos = weibos;
+                        } else {
+                            Constant.weibos.clear();
+                            Constant.weibos.addAll(weibos);
+                        }
+                        MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, Constant.weibos, R.layout.list_item_weibo);
                         MainActivity.this.rvWeibos.setAdapter(MainActivity.this.rvAdapter);
                     }
                 });
@@ -258,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (v.getId()) {
             case R.id.fab:
                 break;
-            case R.id.toolbar:
+            case R.id.toolbarMain:
                 rvWeibos.getLayoutManager().scrollToPosition(0);
                 break;
         }
