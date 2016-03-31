@@ -61,13 +61,16 @@ public class WeiboBiz {
      * @param weibos   微博列表
      * @param type     类型 {@link Constant}
      */
-    synchronized public static void refreshWeibo(MainActivity activity, ArrayList<Weibo> weibos, String type) {
+    synchronized public static int refreshWeibo(MainActivity activity, ArrayList<Weibo> weibos, String type) {
+        if (Constant.IS_FRESHING) {
+            return Constant.FRESHING;
+        }
+        Constant.IS_FRESHING = true;
         if (weibos == null) {
-            return;
+            return Constant.FRESH_FAILED;
         }
         switch (type) {
             case Constant.LOAD_MORE:
-                sendLoadSuccessMsg(activity);
                 break;
             case Constant.LOAD_NEW:
                 ArrayList<Weibo> newWeibos = new ArrayList<>();
@@ -79,13 +82,11 @@ public class WeiboBiz {
                 try {
                     JSONObject jObject = new JSONObject(s);
                     if (!jObject.has("statuses")) {
-                        sendLoadFailedMsg(activity);
-                        return;
+                        return Constant.FRESH_FAILED;
                     } else {
                         JSONArray jArray = jObject.getJSONArray("statuses");
                         if (jArray.length() == 0) {
-                            sendLoadNoNewMsg(activity);
-                            return;
+                            return Constant.FRESH_NO_NEW;
                         }
                         for (int i = 0; i < jArray.length(); i++) {
                             newWeibos.add(getWeibo(jArray.getJSONObject(i)));
@@ -94,16 +95,15 @@ public class WeiboBiz {
                         weibos.clear();
                         weibos.addAll(newWeibos);
                         newWeibos.clear();
-                        sendLoadSuccessMsg(activity);
                     }
                 } catch (JSONException e) {
-                    sendLoadFailedMsg(activity);
                     e.printStackTrace();
                 }
                 break;
             default:
-                break;
+                return Constant.FRESH_FAILED;
         }
+        return Constant.FRESH_FAILED;
     }
 
     @NonNull
@@ -151,23 +151,5 @@ public class WeiboBiz {
             weibo.setUser(UserBiz.getUser(weiboObject.getJSONObject("user")));
         }
         return weibo;
-    }
-
-    private static void sendLoadNoNewMsg(MainActivity activity) {
-        Message msg = new Message();
-        msg.what = Constant.FRESH_NO_NEW;
-        activity.mHandler.sendMessage(msg);
-    }
-
-    private static void sendLoadSuccessMsg(MainActivity activity) {
-        Message msg = new Message();
-        msg.what = Constant.FRESH_SUCCESS;
-        activity.mHandler.sendMessage(msg);
-    }
-
-    private static void sendLoadFailedMsg(MainActivity activity) {
-        Message msg = new Message();
-        msg.what = Constant.FRESH_FAILED;
-        activity.mHandler.sendMessage(msg);
     }
 }
