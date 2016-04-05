@@ -41,6 +41,8 @@ public class Weibo {
     private Weibo retweeted_status;
     // 微博作者的用户信息字段
     private User user;
+    // 是否被删除 0：否 1：是 仅在被删除的情况下返回
+    private int deleted;
     // 以下属性暂未支持
     private String in_reply_to_status_id;
     private String in_reply_to_user_id;
@@ -204,5 +206,13 @@ public class Weibo {
 
     public ArrayList<String> getPic_urls() {
         return pic_urls;
+    }
+
+    public void setDeleted(int deleted) {
+        this.deleted = deleted;
+    }
+
+    public int getDeleted() {
+        return deleted;
     }
 }

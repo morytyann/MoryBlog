@@ -8,6 +8,7 @@ import com.mory.moryblog.entity.Comment;
 import com.mory.moryblog.entity.Weibo;
 import com.mory.moryblog.util.Constant;
 import com.mory.moryblog.util.SettingKeeper;
+import com.mory.moryblog.util.StringUtil;
 import com.sina.weibo.sdk.net.AsyncWeiboRunner;
 import com.sina.weibo.sdk.net.WeiboParameters;
 import com.squareup.picasso.Picasso;
@@ -16,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 
 /**
@@ -75,7 +77,11 @@ public class CommentBiz {
     public static void showComment(AppCompatActivity activity, CommentViewHolder holder, Comment comment) {
         Picasso.with(activity).load(comment.getUser().getAvatar_large()).into(holder.civCommentUserAvatar);
         holder.tvCommentUser.setText(comment.getUser().getName());
-        holder.tvCommentCreateAt.setText(comment.getCreated_at());
+        try {
+            holder.tvCommentCreateAt.setText(StringUtil.getReadableTime(comment.getCreated_at()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         holder.tvCommentText.setText(comment.getText());
     }
 }

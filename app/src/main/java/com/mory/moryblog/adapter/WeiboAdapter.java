@@ -1,26 +1,26 @@
 package com.mory.moryblog.adapter;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.mory.moryblog.R;
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.activity.WeiboDetailActivity;
 import com.mory.moryblog.biz.WeiboBiz;
-import com.mory.moryblog.entity.User;
 import com.mory.moryblog.entity.Weibo;
-import com.mory.moryblog.listener.OnPicClickListener;
-import com.mory.moryblog.util.StringUtil;
-import com.squareup.picasso.Picasso;
+import com.mory.moryblog.util.Constant;
 
-import java.text.ParseException;
 import java.util.ArrayList;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Mory on 2016/3/28.
@@ -28,14 +28,15 @@ import java.util.ArrayList;
  */
 public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
     private MainActivity activity;
+    private LinearLayoutManager manager;
     private LayoutInflater inflater;
     private ArrayList<Weibo> weibos;
     private int resource;
-    private int position;
 
-    public WeiboAdapter(MainActivity activity, ArrayList<Weibo> weibos, int resource) {
+    public WeiboAdapter(MainActivity activity, LinearLayoutManager manager, ArrayList<Weibo> weibos, int resource) {
         this.weibos = weibos;
         this.resource = resource;
+        this.manager = manager;
         this.activity = activity;
         this.inflater = this.activity.getLayoutInflater();
     }
@@ -73,5 +74,46 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
             }
         });
         WeiboBiz.showWeibo(activity, weibos.get(position), holder, position);
+        if (manager.findLastVisibleItemPosition() == getItemCount() - 2 && !Constant.IS_FRESHING) {
+            Observable.create(new Observable.OnSubscribe<Integer>() {
+                @Override
+                public void call(Subscriber<? super Integer> subscriber) {
+                    subscriber.onNext(WeiboBiz.refreshWeibo(activity, Constant.TYPE_LOAD_MORE));
+                    subscriber.onCompleted();
+                }
+            })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(new Subscriber<Integer>() {
+                        @Override
+                        public void onCompleted() {
+                            Constant.IS_FRESHING = false;
+                            Log.d(Constant.TAG, "onCompleted: " + "OK");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Toast.makeText(activity, "出错啦，错误代码" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onNext(Integer integer) {
+                            switch (integer) {
+                                case Constant.FRESH_SUCCESS: // 刷新成功
+                                    notifyDataSetChanged();
+                                    break;
+                                case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
+                                    Toast.makeText(activity, "没有更多微博了", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case Constant.FRESH_FAILED: // 刷新失败
+                                    Toast.makeText(activity, "刷新失败", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case Constant.FRESHING: // 正在刷新
+                                    Toast.makeText(activity, "正在刷新...", Toast.LENGTH_SHORT).show();
+                                    break;
+                            }
+                        }
+                    });
+        }
     }
 }

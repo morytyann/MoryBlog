@@ -44,12 +44,12 @@ public class Constant {
     /**
      * 加载更多
      */
-    public static final String LOAD_MORE = "MORE";
+    public static final String TYPE_LOAD_MORE = "MORE";
 
     /**
      * 加载最新
      */
-    public static final String LOAD_NEW = "NEW";
+    public static final String TYPE_LOAD_NEW = "NEW";
 
     /**
      * 刷新失败

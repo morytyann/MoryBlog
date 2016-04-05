@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,25 +80,52 @@ public class WeiboBiz {
      * @param type     类型 {@link Constant}
      */
     synchronized public static int refreshWeibo(MainActivity activity, String type) {
+        // 如果正在刷新则返回
         if (Constant.IS_FRESHING) {
             return Constant.FRESHING;
         }
+        // 更改刷新状态
         Constant.IS_FRESHING = true;
-        if (Constant.weibos == null) {
-            return Constant.FRESH_FAILED;
-        }
+        // 初始化需要的变量
+        AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
+        WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
+        ArrayList<Weibo> tempWeibos = new ArrayList<>();
+        String result;
+        // 根据参数刷新列表
         switch (type) {
-            case Constant.LOAD_MORE:
-                break;
-            case Constant.LOAD_NEW:
-                ArrayList<Weibo> newWeibos = new ArrayList<>();
-                AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
-                WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
+            case Constant.TYPE_LOAD_MORE:
+                long maxId = Long.valueOf(Constant.weibos.get(Constant.weibos.size() - 1).getIdString()) - 1;
+                params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
+                params.put("max_id", maxId + "");
+                result = runner.request(Constant.HOME_TIMELINE, params, "GET");
+                try {
+                    JSONObject jObject = new JSONObject(result);
+                    if (!jObject.has("statuses")) {
+                        return Constant.FRESH_FAILED;
+                    } else {
+                        JSONArray jArray = jObject.getJSONArray("statuses");
+                        if (jArray.length() == 0) {
+                            return Constant.FRESH_NO_NEW;
+                        }
+                        tempWeibos.addAll(Constant.weibos);
+                        for (int i = 0; i < jArray.length(); i++) {
+                            tempWeibos.add(getWeibo(jArray.getJSONObject(i)));
+                        }
+                        Constant.weibos.clear();
+                        Constant.weibos.addAll(tempWeibos);
+                        tempWeibos.clear();
+                        return Constant.FRESH_SUCCESS;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return Constant.FRESH_FAILED;
+            case Constant.TYPE_LOAD_NEW:
                 params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
                 params.put("since_id", Constant.weibos.get(0).getIdString());
-                String s = runner.request(Constant.HOME_TIMELINE, params, "GET");
+                result = runner.request(Constant.HOME_TIMELINE, params, "GET");
                 try {
-                    JSONObject jObject = new JSONObject(s);
+                    JSONObject jObject = new JSONObject(result);
                     if (!jObject.has("statuses")) {
                         return Constant.FRESH_FAILED;
                     } else {
@@ -106,19 +134,17 @@ public class WeiboBiz {
                             return Constant.FRESH_NO_NEW;
                         }
                         for (int i = 0; i < jArray.length(); i++) {
-                            newWeibos.add(getWeibo(jArray.getJSONObject(i)));
+                            tempWeibos.add(getWeibo(jArray.getJSONObject(i)));
                         }
-                        newWeibos.addAll(Constant.weibos);
+                        tempWeibos.addAll(Constant.weibos);
                         Constant.weibos.clear();
-                        Constant.weibos.addAll(newWeibos);
-                        newWeibos.clear();
+                        Constant.weibos.addAll(tempWeibos);
+                        tempWeibos.clear();
+                        return Constant.FRESH_SUCCESS;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                break;
-            default:
-                return Constant.FRESH_FAILED;
         }
         return Constant.FRESH_FAILED;
     }
@@ -174,6 +200,9 @@ public class WeiboBiz {
         if (weiboObject.has("user")) {
             weibo.setUser(UserBiz.getUser(weiboObject.getJSONObject("user")));
         }
+        if (weiboObject.has("deleted")) {
+            weibo.setDeleted(weiboObject.getInt("deleted"));
+        }
         return weibo;
     }
 
@@ -211,7 +240,11 @@ public class WeiboBiz {
         holder.glRetweetPics.removeAllViews();
         if (retweet != null) {
             holder.llRetweet.setVisibility(View.VISIBLE);
-            holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：\n" + retweet.getText());
+            if (retweet.getDeleted() != 1) {
+                holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：\n" + retweet.getText());
+            } else {
+                holder.tvRetweetText.setText(retweet.getText());
+            }
             holder.tvAllCount.setText(retweet.getComments_count() + "评论|" + retweet.getReposts_count() + "转发|" + retweet.getAttitudes_count() + "赞");
             ArrayList<String> pic_urls = retweet.getPic_urls();
             if (pic_urls != null && pic_urls.size() > 0) {

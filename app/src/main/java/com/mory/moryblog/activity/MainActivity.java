@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -42,8 +42,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private SwipeRefreshLayout srl;
     private RecyclerView rvWeibos;
-    private SsoHandler handler;
+    private SsoHandler ssoHandler;
     private WeiboAdapter rvAdapter;
+    private LinearLayoutManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +84,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             nav.setNavigationItemSelectedListener(this);
         }
         // 初始化RecyclerView
-        rvWeibos.setLayoutManager(new LinearLayoutManager(this));
+        manager = new LinearLayoutManager(this);
+        rvWeibos.setLayoutManager(manager);
         rvWeibos.setItemAnimator(new DefaultItemAnimator());
         // 下拉刷新的监听
         if (srl != null) {
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Observable.create(new Observable.OnSubscribe<Integer>() {
                         @Override
                         public void call(Subscriber<? super Integer> subscriber) {
-                            subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.LOAD_NEW));
+                            subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.TYPE_LOAD_NEW));
                             subscriber.onCompleted();
                         }
                     })
@@ -136,8 +138,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
-        // 加载更多
-
         // 设置侧边栏打开关闭旋钮
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -149,8 +149,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     private void oAuth() {
         AuthInfo authInfo = new AuthInfo(this, Constant.APP_KEY, Constant.REDIRECT_URL, Constant.SCOPE);
-        handler = new SsoHandler(this, authInfo);
-        handler.authorize(new MyAuthListener(this));
+        ssoHandler = new SsoHandler(this, authInfo);
+        ssoHandler.authorize(new MyAuthListener(this));
     }
 
     /**
@@ -166,17 +166,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<ArrayList<Weibo>>() {
+                .subscribe(new Subscriber<ArrayList<Weibo>>() {
                     @Override
-                    public void call(ArrayList<Weibo> weibos) {
-                        if (Constant.weibos == null) {
-                            Constant.weibos = weibos;
-                        } else {
-                            Constant.weibos.clear();
-                            Constant.weibos.addAll(weibos);
-                        }
-                        MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, Constant.weibos, R.layout.list_item_weibo);
+                    public void onCompleted() {
+                        MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, manager, Constant.weibos, R.layout.list_item_weibo);
                         MainActivity.this.rvWeibos.setAdapter(MainActivity.this.rvAdapter);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(MainActivity.this, "微博加载失败，错误:" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(ArrayList<Weibo> weibos) {
+                        Constant.weibos = new ArrayList<>();
+                        Constant.weibos.addAll(weibos);
                     }
                 });
     }
@@ -184,8 +189,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (handler != null) {
-            handler.authorizeCallBack(requestCode, resultCode, data);
+        if (ssoHandler != null) {
+            ssoHandler.authorizeCallBack(requestCode, resultCode, data);
         }
     }
 
@@ -229,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:
+                Snackbar.make(v, "HelloWorld", Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.toolbarMain:
                 rvWeibos.getLayoutManager().scrollToPosition(0);
