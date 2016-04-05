@@ -21,9 +21,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
     private ArrayList<Comment> comments;
     private int resource;
 
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_NORMAL = 0;
-
     public CommentAdapter(AppCompatActivity activity, ArrayList<Comment> comments, int resource) {
         this.activity = activity;
         this.comments = comments;
@@ -45,13 +42,5 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
     @Override
     public int getItemCount() {
         return comments.size();
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (position == 0) {
-            return TYPE_HEADER;
-        }
-        return TYPE_NORMAL;
     }
 }

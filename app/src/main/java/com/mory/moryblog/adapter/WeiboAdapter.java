@@ -55,12 +55,6 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
     @Override
     public WeiboViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(resource, parent, false);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activity.startActivity(new Intent(activity, WeiboDetailActivity.class).putExtra("position", position));
-            }
-        });
         return new WeiboViewHolder(view);
     }
 
@@ -71,8 +65,13 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
      * @param position 当前位置
      */
     @Override
-    public void onBindViewHolder(WeiboViewHolder holder, int position) {
-        this.position = position;
+    public void onBindViewHolder(WeiboViewHolder holder, final int position) {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.startActivity(new Intent(activity, WeiboDetailActivity.class).putExtra("position", position));
+            }
+        });
         WeiboBiz.showWeibo(activity, weibos.get(position), holder, position);
     }
 }

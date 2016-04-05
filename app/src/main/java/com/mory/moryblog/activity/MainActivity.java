@@ -103,30 +103,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 @Override
                                 public void onCompleted() {
                                     Constant.IS_FRESHING = false;
+                                    srl.setRefreshing(false);
                                     Log.d(Constant.TAG, "onCompleted: " + "OK");
                                 }
 
                                 @Override
                                 public void onError(Throwable e) {
-                                    Toast.makeText(MainActivity.this, "加载失败...", Toast.LENGTH_SHORT).show();
+                                    Constant.IS_FRESHING = false;
+                                    srl.setRefreshing(false);
+                                    Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
                                     Log.d(Constant.TAG, "onError: " + e.getLocalizedMessage());
                                 }
 
                                 @Override
                                 public void onNext(Integer integer) {
                                     switch (integer) {
-                                        case Constant.FRESH_SUCCESS: // 刷新成功的消息
-                                            srl.setRefreshing(false);
+                                        case Constant.FRESH_SUCCESS: // 刷新成功
                                             rvAdapter.notifyDataSetChanged();
                                             break;
-                                        case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博的消息
-                                            srl.setRefreshing(false);
+                                        case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
                                             Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
                                             break;
-                                        case Constant.FRESH_FAILED: // 刷新失败的消息
+                                        case Constant.FRESH_FAILED: // 刷新失败
                                             Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
                                             break;
-                                        case Constant.FRESHING: // 正在刷新的消息
+                                        case Constant.FRESHING: // 正在刷新
                                             Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
                                             break;
                                     }

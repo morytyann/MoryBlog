@@ -31,6 +31,7 @@ public class WeiboViewHolder extends RecyclerView.ViewHolder {
     public TextView tvCommentCount;
     public TextView tvRetweetCount;
     public LinearLayout llContent;
+    public View itemView;
 
     public WeiboViewHolder(View itemView) {
         super(itemView);
@@ -48,5 +49,6 @@ public class WeiboViewHolder extends RecyclerView.ViewHolder {
         tvCommentCount = (TextView) itemView.findViewById(R.id.tvCommentCount);
         tvRetweetCount = (TextView) itemView.findViewById(R.id.tvRetweetCount);
         llContent = (LinearLayout) itemView.findViewById(R.id.llContent);
+        this.itemView = itemView;
     }
 }

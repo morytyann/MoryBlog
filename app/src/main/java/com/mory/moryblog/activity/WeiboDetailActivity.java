@@ -6,9 +6,12 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader;
 import com.mory.moryblog.R;
 import com.mory.moryblog.adapter.CommentAdapter;
 import com.mory.moryblog.adapter.WeiboViewHolder;
@@ -25,10 +28,9 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class WeiboDetailActivity extends AppCompatActivity {
+public class WeiboDetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerView rvComments;
-    private LinearLayout llWeibo;
     private ArrayList<Comment> comments;
     private Weibo weibo;
     private int position;
@@ -76,14 +78,30 @@ public class WeiboDetailActivity extends AppCompatActivity {
 
     private void setViews() {
         // findViewById
-        llWeibo = (LinearLayout) findViewById(R.id.llWeibo);
         rvComments = (RecyclerView) findViewById(R.id.rvComments);
-        // 显示微博
-        WeiboBiz.showWeibo(this, weibo, new WeiboViewHolder(llWeibo), position);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarWeiboDetail);
+        // 设置标题
+        if (toolbar != null) {
+            toolbar.setOnClickListener(this);
+            setSupportActionBar(toolbar);
+        }
         // 显示评论
         rvComments.setItemAnimator(new DefaultItemAnimator());
         rvComments.setLayoutManager(new LinearLayoutManager(this));
         rvAdapter = new CommentAdapter(this, comments, R.layout.list_item_comment);
         rvComments.setAdapter(rvAdapter);
+        // 显示微博
+        RecyclerViewHeader header = RecyclerViewHeader.fromXml(this, R.layout.list_item_weibo);
+        WeiboBiz.showWeibo(this, weibo, new WeiboViewHolder(header), position);
+        header.attachTo(rvComments);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.toolbarWeiboDetail:
+                rvComments.getLayoutManager().scrollToPosition(0);
+                break;
+        }
     }
 }
