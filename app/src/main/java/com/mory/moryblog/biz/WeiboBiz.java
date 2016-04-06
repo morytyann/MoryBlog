@@ -52,10 +52,13 @@ public class WeiboBiz {
      * @return 微博列表
      */
     public static ArrayList<Weibo> loadWeibo(MainActivity activity) {
+        // 初始化需要的变量
+        StringUtil.init();
         ArrayList<Weibo> weibos = new ArrayList<>();
         AsyncWeiboRunner runner = new AsyncWeiboRunner(activity);
         WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
         params.put("access_token", SettingKeeper.readAccessToken(activity).getToken());
+        // 加载列表
         String result = runner.request(Constant.HOME_TIMELINE, params, "GET");
         try {
             JSONObject jObject = new JSONObject(result);
@@ -91,6 +94,7 @@ public class WeiboBiz {
         WeiboParameters params = new WeiboParameters(Constant.APP_KEY);
         ArrayList<Weibo> tempWeibos = new ArrayList<>();
         String result;
+        StringUtil.init();
         // 根据参数刷新列表
         switch (type) {
             case Constant.TYPE_LOAD_MORE:
@@ -219,7 +223,7 @@ public class WeiboBiz {
             Point p = new Point();
             activity.getWindowManager().getDefaultDisplay().getSize(p);
             retweetGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd() + holder.llRetweet.getPaddingStart() + holder.llRetweet.getPaddingEnd());
-            weiboGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd());
+            weiboGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd() + holder.glPics.getPaddingStart() + holder.glPics.getPaddingEnd());
             inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
         Weibo retweet = weibo.getRetweeted_status();
@@ -241,38 +245,84 @@ public class WeiboBiz {
         if (retweet != null) {
             holder.llRetweet.setVisibility(View.VISIBLE);
             if (retweet.getDeleted() != 1) {
-                holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：\n" + retweet.getText());
+                holder.tvRetweetText.setText("@" + retweet.getUser().getName() + "：" + retweet.getText());
             } else {
                 holder.tvRetweetText.setText(retweet.getText());
             }
             holder.tvAllCount.setText(retweet.getComments_count() + "评论|" + retweet.getReposts_count() + "转发|" + retweet.getAttitudes_count() + "赞");
             ArrayList<String> pic_urls = retweet.getPic_urls();
-            if (pic_urls != null && pic_urls.size() > 0) {
-                for (int i = 0; i < pic_urls.size(); i++) {
+            int size = pic_urls.size();
+            if (pic_urls != null && size > 0) {
+                int width;
+                int height;
+                int count;
+                switch (size) {
+                    case 1:
+                        width = retweetGridLayoutWidth / 4 * 3;
+                        height = retweetGridLayoutWidth / 4 * 3;
+                        count = 1;
+                        break;
+                    case 4:
+                        width = retweetGridLayoutWidth / 8 * 3;
+                        height = retweetGridLayoutWidth / 8 * 3;
+                        count = 2;
+                        break;
+                    default:
+                        width = retweetGridLayoutWidth / 4;
+                        height = retweetGridLayoutWidth / 4;
+                        count = 3;
+                        break;
+                }
+                holder.glRetweetPics.setColumnCount(count);
+                holder.glRetweetPics.setRowCount(count);
+                for (int i = 0; i < size; i++) {
                     ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glRetweetPics, false);
                     ViewGroup.LayoutParams params = view.getLayoutParams();
-                    params.width = retweetGridLayoutWidth / 3;
-                    params.height = retweetGridLayoutWidth / 3;
+                    params.width = width;
+                    params.height = height;
                     view.setTag(R.id.tag0, pic_urls);
                     view.setTag(R.id.tag_1, i);
                     view.setOnClickListener(new OnPicClickListener(activity));
-                    Picasso.with(activity).load(pic_urls.get(i)).resize(retweetGridLayoutWidth / 3, retweetGridLayoutWidth / 3).centerCrop().into(view);
+                    Picasso.with(activity).load(pic_urls.get(i)).resize(width, height).centerCrop().into(view);
                     holder.glRetweetPics.addView(view);
                 }
             }
         } else {
             holder.llRetweet.setVisibility(View.GONE);
             ArrayList<String> pic_urls = weibo.getPic_urls();
-            if (pic_urls != null && pic_urls.size() > 0) {
+            int size = pic_urls.size();
+            if (pic_urls != null && size > 0) {
+                int width;
+                int height;
+                int count;
+                switch (size) {
+                    case 1:
+                        width = weiboGridLayoutWidth / 4 * 3;
+                        height = weiboGridLayoutWidth / 4 * 3;
+                        count = 1;
+                        break;
+                    case 4:
+                        width = weiboGridLayoutWidth / 8 * 3;
+                        height = weiboGridLayoutWidth / 8 * 3;
+                        count = 2;
+                        break;
+                    default:
+                        width = weiboGridLayoutWidth / 4;
+                        height = weiboGridLayoutWidth / 4;
+                        count = 3;
+                        break;
+                }
+                holder.glPics.setColumnCount(count);
+                holder.glPics.setRowCount(count);
                 for (int i = 0; i < pic_urls.size(); i++) {
                     ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glPics, false);
                     ViewGroup.LayoutParams params = view.getLayoutParams();
-                    params.width = weiboGridLayoutWidth / 3;
-                    params.height = weiboGridLayoutWidth / 3;
+                    params.width = width;
+                    params.height = height;
                     view.setTag(R.id.tag0, pic_urls);
                     view.setTag(R.id.tag_1, i);
                     view.setOnClickListener(new OnPicClickListener(activity));
-                    Picasso.with(activity).load(pic_urls.get(i)).resize(weiboGridLayoutWidth / 3, weiboGridLayoutWidth / 3).centerCrop().into(view);
+                    Picasso.with(activity).load(pic_urls.get(i)).resize(width, height).centerCrop().into(view);
                     holder.glPics.addView(view);
                 }
             }

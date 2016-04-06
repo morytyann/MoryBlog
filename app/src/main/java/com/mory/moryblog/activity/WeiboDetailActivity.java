@@ -100,7 +100,7 @@ public class WeiboDetailActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbarWeiboDetail:
-                rvComments.getLayoutManager().scrollToPosition(0);
+                rvComments.getLayoutManager().smoothScrollToPosition(rvComments, null, 0);
                 break;
         }
     }

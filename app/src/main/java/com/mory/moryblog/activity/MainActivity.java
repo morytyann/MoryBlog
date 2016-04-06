@@ -92,49 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    Observable.create(new Observable.OnSubscribe<Integer>() {
-                        @Override
-                        public void call(Subscriber<? super Integer> subscriber) {
-                            subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.TYPE_LOAD_NEW));
-                            subscriber.onCompleted();
-                        }
-                    })
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeOn(Schedulers.io())
-                            .subscribe(new Subscriber<Integer>() {
-                                @Override
-                                public void onCompleted() {
-                                    Constant.IS_FRESHING = false;
-                                    srl.setRefreshing(false);
-                                    Log.d(Constant.TAG, "onCompleted: " + "OK");
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Constant.IS_FRESHING = false;
-                                    srl.setRefreshing(false);
-                                    Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
-                                    Log.d(Constant.TAG, "onError: " + e.getLocalizedMessage());
-                                }
-
-                                @Override
-                                public void onNext(Integer integer) {
-                                    switch (integer) {
-                                        case Constant.FRESH_SUCCESS: // 刷新成功
-                                            rvAdapter.notifyDataSetChanged();
-                                            break;
-                                        case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
-                                            Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
-                                            break;
-                                        case Constant.FRESH_FAILED: // 刷新失败
-                                            Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
-                                            break;
-                                        case Constant.FRESHING: // 正在刷新
-                                            Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
-                                            break;
-                                    }
-                                }
-                            });
+                    doRefreshLoadNew();
                 }
             });
         }
@@ -182,6 +140,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onNext(ArrayList<Weibo> weibos) {
                         Constant.weibos = new ArrayList<>();
                         Constant.weibos.addAll(weibos);
+                    }
+                });
+    }
+
+    // 完成加载新微博的业务
+    private void doRefreshLoadNew() {
+        Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.TYPE_LOAD_NEW));
+                subscriber.onCompleted();
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onCompleted() {
+                        Constant.IS_FRESHING = false;
+                        srl.setRefreshing(false);
+                        Log.d(Constant.TAG, "onCompleted: " + "OK");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Constant.IS_FRESHING = false;
+                        srl.setRefreshing(false);
+                        Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
+                        Log.d(Constant.TAG, "onError: " + e.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        switch (integer) {
+                            case Constant.FRESH_SUCCESS: // 刷新成功
+                                rvAdapter.notifyDataSetChanged();
+                                break;
+                            case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
+                                Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
+                                break;
+                            case Constant.FRESH_FAILED: // 刷新失败
+                                Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
+                                break;
+                            case Constant.FRESHING: // 正在刷新
+                                Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
+                                break;
+                        }
                     }
                 });
     }
@@ -237,7 +242,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Snackbar.make(v, "HelloWorld", Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.toolbarMain:
-                rvWeibos.getLayoutManager().scrollToPosition(0);
+                if (manager.findFirstCompletelyVisibleItemPosition() == 0) {
+                    srl.setRefreshing(true);
+                    doRefreshLoadNew();
+                    return;
+                }
+                manager.smoothScrollToPosition(rvWeibos, null, 0);
                 break;
         }
     }

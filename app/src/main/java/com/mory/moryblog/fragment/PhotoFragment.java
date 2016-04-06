@@ -20,10 +20,6 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 public class PhotoFragment extends Fragment {
     private String pic_url;
 
-    public PhotoFragment() {
-
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,17 +28,15 @@ public class PhotoFragment extends Fragment {
         ivPhoto.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
             @Override
             public void onPhotoTap(View view, float x, float y) {
-
+                getActivity().finish();
             }
 
             @Override
             public void onOutsidePhotoTap() {
-                getActivity().finish();
+
             }
         });
         Picasso.with(getContext()).load(pic_url).into(ivPhoto);
-        ivPhoto.setMaximumScale(8f);
-        ivPhoto.setMediumScale(4f);
         return v;
     }
 
