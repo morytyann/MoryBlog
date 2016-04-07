@@ -1,18 +1,28 @@
 package com.mory.moryblog.util;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.GridLayout;
+import android.widget.ImageView;
 
+import com.mory.moryblog.R;
+import com.mory.moryblog.listener.OnPicClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -68,7 +78,7 @@ public class ImageUtil {
     }
 
     /**
-     * 此乃显示普通图片的方法（同时监听点击图片退出）
+     * 此乃显示普通图片的方法（同时监听点击事件）
      *
      * @param activity 当前Activity
      * @param imgUrl   图片地址
@@ -87,5 +97,50 @@ public class ImageUtil {
             }
         });
         Picasso.with(activity).load(imgUrl).into(view);
+    }
+
+    /**
+     * 此乃显示九宫格的方法（同时监听点击事件）
+     *
+     * @param activity   当前Activity
+     * @param imgUrls    图片地址集合
+     * @param gridLayout 九宫格View
+     * @param width      图片宽度
+     * @param height     图片高度
+     */
+    public static void showPhotoOnGridLayout(final AppCompatActivity activity, final ArrayList<String> imgUrls, final GridLayout gridLayout, final int width, final int height) {
+        Observable.from(imgUrls).observeOn(Schedulers.io())
+                .map(new Func1<String, Bitmap>() {
+                    @Override
+                    public Bitmap call(String s) {
+                        try {
+                            return Picasso.with(activity).load(s).resize(width, height).centerCrop().get();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                .subscribe(new Action1<Bitmap>() {
+                    private int i = 0;
+
+                    @Override
+                    public void call(Bitmap bitmap) {
+                        if (bitmap == null) {
+                            return;
+                        }
+                        ImageView view = (ImageView) activity.getLayoutInflater().inflate(R.layout.grid_item_pic, gridLayout, false);
+                        ViewGroup.LayoutParams params = view.getLayoutParams();
+                        params.width = width;
+                        params.height = height;
+                        view.setTag(R.id.tag0, imgUrls);
+                        view.setTag(R.id.tag1, i);
+                        view.setOnClickListener(new OnPicClickListener(activity));
+                        view.setImageBitmap(bitmap);
+                        gridLayout.addView(view);
+                        i++;
+                    }
+                });
     }
 }

@@ -4,19 +4,15 @@ import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.mory.moryblog.R;
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.adapter.WeiboViewHolder;
 import com.mory.moryblog.entity.User;
 import com.mory.moryblog.entity.Weibo;
-import com.mory.moryblog.listener.OnPicClickListener;
 import com.mory.moryblog.util.Constant;
+import com.mory.moryblog.util.ImageUtil;
 import com.mory.moryblog.util.SettingKeeper;
 import com.mory.moryblog.util.StringUtil;
 import com.sina.weibo.sdk.net.AsyncWeiboRunner;
@@ -47,6 +43,7 @@ public class WeiboBiz {
 
     /**
      * 初次加载微博
+     * 这是个同步方法
      *
      * @param activity 上下文
      * @return 微博列表
@@ -78,6 +75,7 @@ public class WeiboBiz {
 
     /**
      * 更新微博列表（加载最新Or加载更多）
+     * 这是个同步方法
      *
      * @param activity 上下文
      * @param type     类型 {@link Constant}
@@ -218,7 +216,7 @@ public class WeiboBiz {
      * @param holder   持有所有子View的对象
      * @param position 位置
      */
-    public static void showWeibo(AppCompatActivity activity, Weibo weibo, WeiboViewHolder holder, int position) {
+    public static void showWeibo(final AppCompatActivity activity, Weibo weibo, final WeiboViewHolder holder, int position) {
         if (position == 0) {
             Point p = new Point();
             activity.getWindowManager().getDefaultDisplay().getSize(p);
@@ -250,81 +248,44 @@ public class WeiboBiz {
                 holder.tvRetweetText.setText(retweet.getText());
             }
             holder.tvAllCount.setText(retweet.getComments_count() + "评论|" + retweet.getReposts_count() + "转发|" + retweet.getAttitudes_count() + "赞");
-            ArrayList<String> pic_urls = retweet.getPic_urls();
+            final ArrayList<String> pic_urls = retweet.getPic_urls();
             int size = pic_urls.size();
             if (pic_urls != null && size > 0) {
-                int width;
-                int height;
+                final int width = retweetGridLayoutWidth / 4;
+                final int height = retweetGridLayoutWidth / 4;
+                ;
                 int count;
                 switch (size) {
-                    case 1:
-                        width = retweetGridLayoutWidth / 4 * 3;
-                        height = retweetGridLayoutWidth / 4 * 3;
-                        count = 1;
-                        break;
                     case 4:
-                        width = retweetGridLayoutWidth / 8 * 3;
-                        height = retweetGridLayoutWidth / 8 * 3;
                         count = 2;
                         break;
                     default:
-                        width = retweetGridLayoutWidth / 4;
-                        height = retweetGridLayoutWidth / 4;
                         count = 3;
                         break;
                 }
                 holder.glRetweetPics.setColumnCount(count);
                 holder.glRetweetPics.setRowCount(count);
-                for (int i = 0; i < size; i++) {
-                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glRetweetPics, false);
-                    ViewGroup.LayoutParams params = view.getLayoutParams();
-                    params.width = width;
-                    params.height = height;
-                    view.setTag(R.id.tag0, pic_urls);
-                    view.setTag(R.id.tag_1, i);
-                    view.setOnClickListener(new OnPicClickListener(activity));
-                    Picasso.with(activity).load(pic_urls.get(i)).resize(width, height).centerCrop().into(view);
-                    holder.glRetweetPics.addView(view);
-                }
+                ImageUtil.showPhotoOnGridLayout(activity, pic_urls, holder.glRetweetPics, width, height);
             }
         } else {
             holder.llRetweet.setVisibility(View.GONE);
             ArrayList<String> pic_urls = weibo.getPic_urls();
             int size = pic_urls.size();
             if (pic_urls != null && size > 0) {
-                int width;
-                int height;
+                int width = weiboGridLayoutWidth / 4;
+                int height = weiboGridLayoutWidth / 4;
                 int count;
                 switch (size) {
-                    case 1:
-                        width = weiboGridLayoutWidth / 4 * 3;
-                        height = weiboGridLayoutWidth / 4 * 3;
-                        count = 1;
-                        break;
                     case 4:
-                        width = weiboGridLayoutWidth / 8 * 3;
-                        height = weiboGridLayoutWidth / 8 * 3;
                         count = 2;
                         break;
                     default:
-                        width = weiboGridLayoutWidth / 4;
-                        height = weiboGridLayoutWidth / 4;
                         count = 3;
                         break;
                 }
                 holder.glPics.setColumnCount(count);
                 holder.glPics.setRowCount(count);
-                for (int i = 0; i < pic_urls.size(); i++) {
-                    ImageView view = (ImageView) inflater.inflate(R.layout.grid_item_pic, holder.glPics, false);
-                    ViewGroup.LayoutParams params = view.getLayoutParams();
-                    params.width = width;
-                    params.height = height;
-                    view.setTag(R.id.tag0, pic_urls);
-                    view.setTag(R.id.tag_1, i);
-                    view.setOnClickListener(new OnPicClickListener(activity));
-                    Picasso.with(activity).load(pic_urls.get(i)).resize(width, height).centerCrop().into(view);
-                    holder.glPics.addView(view);
-                }
+                ImageUtil.showPhotoOnGridLayout(activity, pic_urls, holder.glPics, width, height);
             }
         }
     }
