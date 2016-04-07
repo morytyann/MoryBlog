@@ -39,8 +39,25 @@ public class PhotoFragment extends Fragment {
         return v;
     }
 
+    /**
+     * 使用newInstance而不是直接new来获得一个Fragment
+     *
+     * @param pic_url 图片地址
+     * @return PhotoFragment的对象
+     */
+    public static PhotoFragment newInstance(String pic_url) {
+        PhotoFragment fragment = new PhotoFragment();
+        Bundle args = new Bundle();
+        args.putString("pic_url", pic_url);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void setArguments(Bundle args) {
-        pic_url = args.getString("pic_url").replace("thumbnail", "bmiddle");
+        String s = args.getString("pic_url");
+        if (s != null) {
+            pic_url = s.replace("thumbnail", "bmiddle");
+        }
     }
 }

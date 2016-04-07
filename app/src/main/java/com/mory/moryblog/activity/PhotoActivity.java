@@ -40,11 +40,7 @@ public class PhotoActivity extends AppCompatActivity {
     private void init() {
         ArrayList<Fragment> fragments = new ArrayList<>();
         for (int i = 0; i < pic_urls.size(); i++) {
-            PhotoFragment fragment = new PhotoFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("pic_url", pic_urls.get(i));
-            fragment.setArguments(bundle);
-            fragments.add(fragment);
+            fragments.add(PhotoFragment.newInstance(pic_urls.get(i)));
         }
         vpPics.setAdapter(new FragmentAdapter(getSupportFragmentManager(), fragments));
         vpPics.setCurrentItem(position);
