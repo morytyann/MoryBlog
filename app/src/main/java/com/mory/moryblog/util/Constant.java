@@ -74,7 +74,7 @@ public class Constant {
     /**
      * 是否正在刷新
      */
-    public static boolean IS_FRESHING = false;
+    public static boolean IS_FRESHING = true;
 
     /**
      * 微博列表

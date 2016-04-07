@@ -8,10 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mory.moryblog.R;
-import com.squareup.picasso.Picasso;
+import com.mory.moryblog.util.ImageUtil;
 
+import pl.droidsonroids.gif.GifImageView;
 import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by Mory on 2016/3/29.
@@ -25,18 +25,17 @@ public class PhotoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo, container, false);
         PhotoView ivPhoto = (PhotoView) v.findViewById(R.id.ivPhoto);
-        ivPhoto.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
-            @Override
-            public void onPhotoTap(View view, float x, float y) {
-                getActivity().finish();
-            }
-
-            @Override
-            public void onOutsidePhotoTap() {
-
-            }
-        });
-        Picasso.with(getContext()).load(pic_url).into(ivPhoto);
+        GifImageView givGifPhoto = (GifImageView) v.findViewById(R.id.givGifPhoto);
+        // 是Gif时加载Gif，不是则按普通方式加载。
+        if (pic_url.endsWith(".gif")) {
+            ivPhoto.setVisibility(View.GONE);
+            givGifPhoto.setVisibility(View.VISIBLE);
+            ImageUtil.showGif(getActivity(), pic_url, givGifPhoto);
+        } else {
+            ivPhoto.setVisibility(View.VISIBLE);
+            givGifPhoto.setVisibility(View.GONE);
+            ImageUtil.showPhoto(getActivity(), pic_url, ivPhoto);
+        }
         return v;
     }
 
