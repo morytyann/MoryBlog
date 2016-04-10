@@ -27,5 +27,8 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.commit451:PhotoView:1.2.5'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'com.bartoszlipinski.recyclerviewheader:library:1.2.0'
     compile files('libs/weiboSDKCore_3.1.4.jar')
 }
