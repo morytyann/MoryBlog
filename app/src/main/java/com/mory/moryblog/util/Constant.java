@@ -1,5 +1,9 @@
 package com.mory.moryblog.util;
 
+import com.mory.moryblog.entity.Weibo;
+
+import java.util.ArrayList;
+
 /**
  * Created by Mory on 2016/3/28.
  * 常量类
@@ -33,14 +37,19 @@ public class Constant {
     public static final String HOME_TIMELINE = "https://api.weibo.com/2/statuses/home_timeline.json";
 
     /**
+     * 加载评论的URL
+     */
+    public static final String COMMENT_SHOW = "https://api.weibo.com/2/comments/show.json";
+
+    /**
      * 加载更多
      */
-    public static final String LOAD_MORE = "MORE";
+    public static final String TYPE_LOAD_MORE = "MORE";
 
     /**
      * 加载最新
      */
-    public static final String LOAD_NEW = "NEW";
+    public static final String TYPE_LOAD_NEW = "NEW";
 
     /**
      * 刷新失败
@@ -65,5 +74,10 @@ public class Constant {
     /**
      * 是否正在刷新
      */
-    public static boolean IS_FRESHING = false;
+    public static boolean IS_FRESHING = true;
+
+    /**
+     * 微博列表
+     */
+    public static ArrayList<Weibo> weibos;
 }

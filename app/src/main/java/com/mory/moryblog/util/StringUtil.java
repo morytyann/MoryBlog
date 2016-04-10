@@ -15,7 +15,7 @@ public class StringUtil {
     private static SimpleDateFormat format = new SimpleDateFormat("MM月dd日 HH:mm", Locale.CHINA);
     private static SimpleDateFormat parse = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);
     private static SimpleDateFormat shortFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
-    private static Date date0 = new Date();
+    private static Date date0;
 
     public static String getReadableTime(String time) throws ParseException {
         Date date = parse.parse(time);
@@ -36,5 +36,9 @@ public class StringUtil {
                     return format.format(date);
             }
         }
+    }
+
+    public static void init() {
+        date0 = new Date();
     }
 }

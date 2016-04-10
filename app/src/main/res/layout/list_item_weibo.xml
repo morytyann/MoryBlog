@@ -2,17 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#EEE"
-    android:orientation="vertical"
-    android:paddingBottom="10dp">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFF"
         android:orientation="horizontal"
-        android:paddingTop="12dp"
-        android:paddingBottom="6dp">
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/civUserAvatar"
@@ -48,11 +46,14 @@
 
         <ImageButton
             android:id="@+id/ibShowMenu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="@string/image_description" />
+            android:background="@null"
+            android:contentDescription="@string/image_description"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_menu" />
     </LinearLayout>
 
     <LinearLayout
@@ -75,8 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingEnd="8dp"
-            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
             android:paddingTop="8dp">
 
             <TextView
@@ -112,28 +113,60 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/image_description"
+                android:scaleType="centerInside"
+                android:src="@drawable/icon_thumb_not_up" />
 
             <TextView
                 android:id="@+id/tvThumbUpCount"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"/>
 
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/image_description"
+                android:scaleType="centerInside"
+                android:src="@drawable/icon_comment" />
+
             <TextView
                 android:id="@+id/tvCommentCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp" />
+                android:layout_marginStart="2dp" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/image_description"
+                android:scaleType="centerInside"
+                android:src="@drawable/icon_retweet"
+                android:layout_marginStart="4dp" />
 
             <TextView
                 android:id="@+id/tvRetweetCount"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp" />
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#F0F0F0" />
 </LinearLayout>
