@@ -40,7 +40,7 @@ public class PhotoFragment extends Fragment {
     }
 
     /**
-     * 使用newInstance而不是直接new来获得一个Fragment
+     * 使用newInstance，而不是new来获得一个Fragment
      *
      * @param pic_url 图片地址
      * @return PhotoFragment的对象
@@ -57,7 +57,7 @@ public class PhotoFragment extends Fragment {
     public void setArguments(Bundle args) {
         String s = args.getString("pic_url");
         if (s != null) {
-            pic_url = s.replace("thumbnail", "bmiddle");
+            this.pic_url = s.replace("thumbnail", "bmiddle");
         }
     }
 }
