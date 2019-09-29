@@ -2,10 +2,13 @@ package com.mory.moryblog.entity;
 
 import java.util.ArrayList;
 
+import lombok.Data;
+
 /**
  * Created by Mory on 2016/3/28.
  * 微博实体类
  */
+@Data
 public class Weibo {
     // 微博创建时间
     private String created_at;
@@ -48,171 +51,4 @@ public class Weibo {
     private String in_reply_to_user_id;
     private String in_reply_to_screen_name;
 
-    public void setCreated_at(String created_at) {
-        this.created_at = created_at;
-    }
-
-    public String getCreated_at() {
-        return this.created_at;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getSource() {
-        return this.source;
-    }
-
-    public boolean isFavorited() {
-        return favorited;
-    }
-
-    public void setFavorited(boolean favorited) {
-        this.favorited = favorited;
-    }
-
-    public boolean isTruncated() {
-        return truncated;
-    }
-
-    public void setTruncated(boolean truncated) {
-        this.truncated = truncated;
-    }
-
-    public void setIn_reply_to_status_id(String in_reply_to_status_id) {
-        this.in_reply_to_status_id = in_reply_to_status_id;
-    }
-
-    public String getIn_reply_to_status_id() {
-        return this.in_reply_to_status_id;
-    }
-
-    public void setIn_reply_to_user_id(String in_reply_to_user_id) {
-        this.in_reply_to_user_id = in_reply_to_user_id;
-    }
-
-    public String getIn_reply_to_user_id() {
-        return this.in_reply_to_user_id;
-    }
-
-    public void setIn_reply_to_screen_name(String in_reply_to_screen_name) {
-        this.in_reply_to_screen_name = in_reply_to_screen_name;
-    }
-
-    public String getIn_reply_to_screen_name() {
-        return this.in_reply_to_screen_name;
-    }
-
-    public void setMid(int mid) {
-        this.mid = mid;
-    }
-
-    public int getMid() {
-        return this.mid;
-    }
-
-    public void setReposts_count(int reposts_count) {
-        this.reposts_count = reposts_count;
-    }
-
-    public int getReposts_count() {
-        return this.reposts_count;
-    }
-
-    public void setComments_count(int comments_count) {
-        this.comments_count = comments_count;
-    }
-
-    public int getComments_count() {
-        return this.comments_count;
-    }
-
-    public void setAttitudes_count(int attitudes_count) {
-        this.attitudes_count = attitudes_count;
-    }
-
-    public int getAttitudes_count() {
-        return attitudes_count;
-    }
-
-    public void setThumbnail_pic(ArrayList<String> thumbnail_pic) {
-        this.thumbnail_pic = thumbnail_pic;
-    }
-
-    public ArrayList<String> getThumbnail_pic() {
-        return thumbnail_pic;
-    }
-
-    public void setBmiddle_pic(ArrayList<String> bmiddle_pic) {
-        this.bmiddle_pic = bmiddle_pic;
-    }
-
-    public ArrayList<String> getBmiddle_pic() {
-        return bmiddle_pic;
-    }
-
-    public void setOriginal_pic(ArrayList<String> original_pic) {
-        this.original_pic = original_pic;
-    }
-
-    public ArrayList<String> getOriginal_pic() {
-        return original_pic;
-    }
-
-    public void setRetweeted_status(Weibo retweeted_status) {
-        this.retweeted_status = retweeted_status;
-    }
-
-    public Weibo getRetweeted_status() {
-        return retweeted_status;
-    }
-
-    public void setIdString(String idString) {
-        this.idString = idString;
-    }
-
-    public String getIdString() {
-        return idString;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setPic_urls(ArrayList<String> pic_urls) {
-        this.pic_urls = pic_urls;
-    }
-
-    public ArrayList<String> getPic_urls() {
-        return pic_urls;
-    }
-
-    public void setDeleted(int deleted) {
-        this.deleted = deleted;
-    }
-
-    public int getDeleted() {
-        return deleted;
-    }
 }

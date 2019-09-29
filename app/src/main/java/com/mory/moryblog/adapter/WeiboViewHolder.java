@@ -1,11 +1,12 @@
 package com.mory.moryblog.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.mory.moryblog.R;
 
@@ -35,20 +36,20 @@ public class WeiboViewHolder extends RecyclerView.ViewHolder {
 
     public WeiboViewHolder(View itemView) {
         super(itemView);
-        civUserAvatar = (CircleImageView) itemView.findViewById(R.id.civUserAvatar);
-        tvUserName = (TextView) itemView.findViewById(R.id.tvUserName);
-        tvCreateAt = (TextView) itemView.findViewById(R.id.tvCreateAt);
-        ibShowMenu = (ImageButton) itemView.findViewById(R.id.ibShowMenu);
-        tvText = (TextView) itemView.findViewById(R.id.tvText);
-        llRetweet = (LinearLayout) itemView.findViewById(R.id.llRetweet);
-        tvRetweetText = (TextView) itemView.findViewById(R.id.tvRetweetText);
-        glRetweetPics = (GridLayout) itemView.findViewById(R.id.glRetweetPics);
-        tvAllCount = (TextView) itemView.findViewById(R.id.tvAllCount);
-        glPics = (GridLayout) itemView.findViewById(R.id.glPics);
-        tvThumbUpCount = (TextView) itemView.findViewById(R.id.tvThumbUpCount);
-        tvCommentCount = (TextView) itemView.findViewById(R.id.tvCommentCount);
-        tvRetweetCount = (TextView) itemView.findViewById(R.id.tvRetweetCount);
-        llContent = (LinearLayout) itemView.findViewById(R.id.llContent);
+        civUserAvatar = itemView.findViewById(R.id.civUserAvatar);
+        tvUserName = itemView.findViewById(R.id.tvUserName);
+        tvCreateAt = itemView.findViewById(R.id.tvCreateAt);
+        ibShowMenu = itemView.findViewById(R.id.ibShowMenu);
+        tvText = itemView.findViewById(R.id.tvText);
+        llRetweet = itemView.findViewById(R.id.llRetweet);
+        tvRetweetText = itemView.findViewById(R.id.tvRetweetText);
+        glRetweetPics = itemView.findViewById(R.id.glRetweetPics);
+        tvAllCount = itemView.findViewById(R.id.tvAllCount);
+        glPics = itemView.findViewById(R.id.glPics);
+        tvThumbUpCount = itemView.findViewById(R.id.tvThumbUpCount);
+        tvCommentCount = itemView.findViewById(R.id.tvCommentCount);
+        tvRetweetCount = itemView.findViewById(R.id.tvRetweetCount);
+        llContent = itemView.findViewById(R.id.llContent);
         this.itemView = itemView;
     }
 }

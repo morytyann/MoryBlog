@@ -1,11 +1,10 @@
 package com.mory.moryblog.biz;
 
-import android.content.Context;
 import android.graphics.Point;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.adapter.WeiboViewHolder;
@@ -39,7 +38,6 @@ import java.util.ArrayList;
 public class WeiboBiz {
     private static int retweetGridLayoutWidth;
     private static int weiboGridLayoutWidth;
-    private static LayoutInflater inflater;
 
     /**
      * 初次加载微博
@@ -222,11 +220,10 @@ public class WeiboBiz {
             activity.getWindowManager().getDefaultDisplay().getSize(p);
             retweetGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd() + holder.llRetweet.getPaddingStart() + holder.llRetweet.getPaddingEnd());
             weiboGridLayoutWidth = p.x - (holder.llContent.getPaddingStart() + holder.llContent.getPaddingEnd() + holder.glPics.getPaddingStart() + holder.glPics.getPaddingEnd());
-            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
         Weibo retweet = weibo.getRetweeted_status();
         User user = weibo.getUser();
-        Picasso.with(activity).load(user.getAvatar_large()).into(holder.civUserAvatar);
+        Picasso.get().load(user.getAvatar_large()).into(holder.civUserAvatar);
         holder.tvUserName.setText(user.getName());
         try {
             holder.tvCreateAt.setText(StringUtil.getReadableTime(weibo.getCreated_at()));
@@ -249,11 +246,10 @@ public class WeiboBiz {
             }
             holder.tvAllCount.setText(retweet.getComments_count() + "评论|" + retweet.getReposts_count() + "转发|" + retweet.getAttitudes_count() + "赞");
             final ArrayList<String> pic_urls = retweet.getPic_urls();
-            int size = pic_urls.size();
-            if (pic_urls != null && size > 0) {
+            int size;
+            if (pic_urls != null && (size = pic_urls.size()) > 0) {
                 final int width = retweetGridLayoutWidth / 4;
                 final int height = retweetGridLayoutWidth / 4;
-                ;
                 int count;
                 switch (size) {
                     case 4:
@@ -270,8 +266,8 @@ public class WeiboBiz {
         } else {
             holder.llRetweet.setVisibility(View.GONE);
             ArrayList<String> pic_urls = weibo.getPic_urls();
-            int size = pic_urls.size();
-            if (pic_urls != null && size > 0) {
+            int size;
+            if (pic_urls != null && (size = pic_urls.size()) > 0) {
                 int width = weiboGridLayoutWidth / 4;
                 int height = weiboGridLayoutWidth / 4;
                 int count;

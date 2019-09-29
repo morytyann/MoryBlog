@@ -2,12 +2,13 @@ package com.mory.moryblog.util;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.mory.moryblog.R;
 import com.mory.moryblog.listener.OnPicClickListener;
@@ -96,7 +97,7 @@ public class ImageUtil {
 
             }
         });
-        Picasso.with(activity).load(imgUrl).into(view);
+        Picasso.get().load(imgUrl).into(view);
     }
 
     /**
@@ -114,7 +115,7 @@ public class ImageUtil {
                     @Override
                     public Bitmap call(String s) {
                         try {
-                            return Picasso.with(activity).load(s).resize(width, height).centerCrop().get();
+                            return Picasso.get().load(s).resize(width, height).centerCrop().get();
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;

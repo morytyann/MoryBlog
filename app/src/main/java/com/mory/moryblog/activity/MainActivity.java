@@ -3,24 +3,25 @@ package com.mory.moryblog.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.mory.moryblog.R;
 import com.mory.moryblog.adapter.WeiboAdapter;
 import com.mory.moryblog.biz.WeiboBiz;
@@ -65,12 +66,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     private void setViews() {
         // findViewById
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarMain);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        NavigationView nav = (NavigationView) findViewById(R.id.nav_view);
-        srl = (SwipeRefreshLayout) findViewById(R.id.srl);
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        rvWeibos = (RecyclerView) findViewById(R.id.rvWeibos);
+        Toolbar toolbar = findViewById(R.id.toolbarMain);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        NavigationView nav = findViewById(R.id.nav_view);
+        srl = findViewById(R.id.srl);
+        drawer = findViewById(R.id.drawer_layout);
+        rvWeibos = findViewById(R.id.rvWeibos);
         // 设置Toolbar
         if (toolbar != null) {
             toolbar.setOnClickListener(this);

@@ -1,8 +1,9 @@
 package com.mory.moryblog.listener;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.mory.moryblog.R;
 import com.mory.moryblog.activity.PhotoActivity;

@@ -1,10 +1,11 @@
 package com.mory.moryblog.adapter;
 
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.mory.moryblog.biz.CommentBiz;
 import com.mory.moryblog.entity.Comment;
@@ -16,16 +17,14 @@ import java.util.ArrayList;
  * 自定义adapter用于显示评论
  */
 public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
-    private AppCompatActivity activity;
     private LayoutInflater inflater;
     private ArrayList<Comment> comments;
     private int resource;
 
     public CommentAdapter(AppCompatActivity activity, ArrayList<Comment> comments, int resource) {
-        this.activity = activity;
         this.comments = comments;
         this.resource = resource;
-        this.inflater = this.activity.getLayoutInflater();
+        this.inflater = activity.getLayoutInflater();
     }
 
     @Override
@@ -36,7 +35,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
 
     @Override
     public void onBindViewHolder(CommentViewHolder holder, int position) {
-        CommentBiz.showComment(activity, holder, comments.get(position));
+        CommentBiz.showComment(holder, comments.get(position));
     }
 
     @Override

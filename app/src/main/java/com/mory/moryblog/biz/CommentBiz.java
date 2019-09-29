@@ -1,7 +1,6 @@
 package com.mory.moryblog.biz;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 
 import com.mory.moryblog.adapter.CommentViewHolder;
 import com.mory.moryblog.entity.Comment;
@@ -74,8 +73,8 @@ public class CommentBiz {
         return comment;
     }
 
-    public static void showComment(AppCompatActivity activity, CommentViewHolder holder, Comment comment) {
-        Picasso.with(activity).load(comment.getUser().getAvatar_large()).into(holder.civCommentUserAvatar);
+    public static void showComment(CommentViewHolder holder, Comment comment) {
+        Picasso.get().load(comment.getUser().getAvatar_large()).into(holder.civCommentUserAvatar);
         holder.tvCommentUser.setText(comment.getUser().getName());
         try {
             holder.tvCommentCreateAt.setText(StringUtil.getReadableTime(comment.getCreated_at()));
