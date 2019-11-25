@@ -123,29 +123,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 subscriber.onNext(WeiboBiz.loadWeibo(MainActivity.this));
                 subscriber.onCompleted();
             }
-        })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<ArrayList<Weibo>>() {
-                    @Override
-                    public void onCompleted() {
-                        Constant.IS_FRESHING = false;
-                        MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, manager, srl, Constant.weibos, R.layout.list_item_weibo);
-                        MainActivity.this.rvWeibos.setAdapter(MainActivity.this.rvAdapter);
-                    }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<ArrayList<Weibo>>() {
+            @Override
+            public void onCompleted() {
+                Constant.IS_FRESHING = false;
+                MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, manager, srl, Constant.weibos, R.layout.list_item_weibo);
+                MainActivity.this.rvWeibos.setAdapter(MainActivity.this.rvAdapter);
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Constant.IS_FRESHING = false;
-                        Toast.makeText(MainActivity.this, "出错啦，错误代码:" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onError(Throwable e) {
+                Constant.IS_FRESHING = false;
+                Toast.makeText(MainActivity.this, "出错啦，错误代码:" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onNext(ArrayList<Weibo> weibos) {
-                        Constant.weibos = new ArrayList<>();
-                        Constant.weibos.addAll(weibos);
-                    }
-                });
+            @Override
+            public void onNext(ArrayList<Weibo> weibos) {
+                Constant.weibos = new ArrayList<>();
+                Constant.weibos.addAll(weibos);
+            }
+        });
     }
 
     /**
@@ -158,39 +155,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.TYPE_LOAD_NEW));
                 subscriber.onCompleted();
             }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<Integer>() {
-                    @Override
-                    public void onCompleted() {
-                        Constant.IS_FRESHING = false;
-                        srl.setRefreshing(false);
-                    }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<Integer>() {
+            @Override
+            public void onCompleted() {
+                Constant.IS_FRESHING = false;
+                srl.setRefreshing(false);
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Constant.IS_FRESHING = false;
-                        srl.setRefreshing(false);
-                        Toast.makeText(MainActivity.this, "出错啦，错误信息：" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onError(Throwable e) {
+                Constant.IS_FRESHING = false;
+                srl.setRefreshing(false);
+                Toast.makeText(MainActivity.this, "出错啦，错误信息：" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onNext(Integer integer) {
-                        switch (integer) {
-                            case Constant.FRESH_SUCCESS: // 刷新成功
-                                rvAdapter.notifyDataSetChanged();
-                                break;
-                            case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
-                                Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
-                                break;
-                            case Constant.FRESH_FAILED: // 刷新失败
-                                Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
-                                break;
-                            case Constant.FRESHING: // 正在刷新
-                                Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-                    }
-                });
+            @Override
+            public void onNext(Integer integer) {
+                switch (integer) {
+                    case Constant.FRESH_SUCCESS: // 刷新成功
+                        rvAdapter.notifyDataSetChanged();
+                        break;
+                    case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
+                        Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
+                        break;
+                    case Constant.FRESH_FAILED: // 刷新失败
+                        Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
+                        break;
+                    case Constant.FRESHING: // 正在刷新
+                        Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
     }
 
     @Override

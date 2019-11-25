@@ -1,10 +1,10 @@
 package com.mory.moryblog.adapter;
 
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mory.moryblog.biz.CommentBiz;
@@ -19,11 +19,13 @@ import java.util.ArrayList;
 public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
     private LayoutInflater inflater;
     private ArrayList<Comment> comments;
+    private Activity activity;
     private int resource;
 
-    public CommentAdapter(AppCompatActivity activity, ArrayList<Comment> comments, int resource) {
+    public CommentAdapter(Activity activity, ArrayList<Comment> comments, int resource) {
         this.comments = comments;
         this.resource = resource;
+        this.activity = activity;
         this.inflater = activity.getLayoutInflater();
     }
 
@@ -35,7 +37,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentViewHolder> {
 
     @Override
     public void onBindViewHolder(CommentViewHolder holder, int position) {
-        CommentBiz.showComment(holder, comments.get(position));
+        CommentBiz.showComment(activity, holder, comments.get(position));
     }
 
     @Override

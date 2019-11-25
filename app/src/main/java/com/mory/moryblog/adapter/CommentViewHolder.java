@@ -24,10 +24,10 @@ public class CommentViewHolder extends RecyclerView.ViewHolder {
 
     public CommentViewHolder(View itemView) {
         super(itemView);
-        civCommentUserAvatar = (CircleImageView) itemView.findViewById(R.id.civCommentUserAvatar);
-        tvCommentUser = (TextView) itemView.findViewById(R.id.tvCommentUser);
-        tvCommentCreateAt = (TextView) itemView.findViewById(R.id.tvCommentCreateAt);
-        ibCommentShowMenu = (ImageButton) itemView.findViewById(R.id.ibCommentShowMenu);
-        tvCommentText = (TextView) itemView.findViewById(R.id.tvCommentText);
+        civCommentUserAvatar = itemView.findViewById(R.id.civCommentUserAvatar);
+        tvCommentUser = itemView.findViewById(R.id.tvCommentUser);
+        tvCommentCreateAt = itemView.findViewById(R.id.tvCommentCreateAt);
+        ibCommentShowMenu = itemView.findViewById(R.id.ibCommentShowMenu);
+        tvCommentText = itemView.findViewById(R.id.tvCommentText);
     }
 }

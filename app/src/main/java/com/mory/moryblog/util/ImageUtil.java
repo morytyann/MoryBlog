@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.mory.moryblog.R;
 import com.mory.moryblog.listener.OnPicClickListener;
 import com.squareup.picasso.Picasso;
@@ -97,7 +95,7 @@ public class ImageUtil {
 
             }
         });
-        Picasso.get().load(imgUrl).into(view);
+        Picasso.with(activity).load(imgUrl).into(view);
     }
 
     /**
@@ -109,13 +107,13 @@ public class ImageUtil {
      * @param width      图片宽度
      * @param height     图片高度
      */
-    public static void showPhotoOnGridLayout(final AppCompatActivity activity, final ArrayList<String> imgUrls, final GridLayout gridLayout, final int width, final int height) {
+    public static void showPhotoOnGridLayout(final Activity activity, final ArrayList<String> imgUrls, final GridLayout gridLayout, final int width, final int height) {
         Observable.from(imgUrls).observeOn(Schedulers.io())
                 .map(new Func1<String, Bitmap>() {
                     @Override
                     public Bitmap call(String s) {
                         try {
-                            return Picasso.get().load(s).resize(width, height).centerCrop().get();
+                            return Picasso.with(activity).load(s).resize(width, height).centerCrop().get();
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;

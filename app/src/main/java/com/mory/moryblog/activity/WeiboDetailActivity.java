@@ -53,32 +53,29 @@ public class WeiboDetailActivity extends AppCompatActivity implements View.OnCli
                 subscriber.onNext(CommentBiz.loadComment(WeiboDetailActivity.this, weibo));
                 subscriber.onCompleted();
             }
-        })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<ArrayList<Comment>>() {
-                    @Override
-                    public void onCompleted() {
-                        rvAdapter.notifyDataSetChanged();
-                    }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<ArrayList<Comment>>() {
+            @Override
+            public void onCompleted() {
+                rvAdapter.notifyDataSetChanged();
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(Constant.TAG, "onError: " + e.getLocalizedMessage());
-                    }
+            @Override
+            public void onError(Throwable e) {
+                Log.d(Constant.TAG, "onError: " + e.getLocalizedMessage());
+            }
 
-                    @Override
-                    public void onNext(ArrayList<Comment> comments) {
-                        WeiboDetailActivity.this.comments.clear();
-                        WeiboDetailActivity.this.comments.addAll(comments);
-                    }
-                });
+            @Override
+            public void onNext(ArrayList<Comment> comments) {
+                WeiboDetailActivity.this.comments.clear();
+                WeiboDetailActivity.this.comments.addAll(comments);
+            }
+        });
     }
 
     private void setViews() {
         // findViewById
-        rvComments = (RecyclerView) findViewById(R.id.rvComments);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarWeiboDetail);
+        rvComments = findViewById(R.id.rvComments);
+        Toolbar toolbar = findViewById(R.id.toolbarWeiboDetail);
         // 设置标题
         if (toolbar != null) {
             toolbar.setOnClickListener(this);

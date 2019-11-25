@@ -1,10 +1,10 @@
 package com.mory.moryblog.biz;
 
+import android.app.Activity;
 import android.graphics.Point;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.adapter.WeiboViewHolder;
@@ -214,7 +214,7 @@ public class WeiboBiz {
      * @param holder   持有所有子View的对象
      * @param position 位置
      */
-    public static void showWeibo(final AppCompatActivity activity, Weibo weibo, final WeiboViewHolder holder, int position) {
+    public static void showWeibo(final Activity activity, Weibo weibo, final WeiboViewHolder holder, int position) {
         if (position == 0) {
             Point p = new Point();
             activity.getWindowManager().getDefaultDisplay().getSize(p);
@@ -223,7 +223,7 @@ public class WeiboBiz {
         }
         Weibo retweet = weibo.getRetweeted_status();
         User user = weibo.getUser();
-        Picasso.get().load(user.getAvatar_large()).into(holder.civUserAvatar);
+        Picasso.with(activity).load(user.getAvatar_large()).into(holder.civUserAvatar);
         holder.tvUserName.setText(user.getName());
         try {
             holder.tvCreateAt.setText(StringUtil.getReadableTime(weibo.getCreated_at()));

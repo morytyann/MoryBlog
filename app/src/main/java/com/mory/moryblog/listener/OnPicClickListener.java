@@ -1,9 +1,8 @@
 package com.mory.moryblog.listener;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.mory.moryblog.R;
 import com.mory.moryblog.activity.PhotoActivity;
@@ -15,9 +14,9 @@ import java.util.ArrayList;
  * 监听查看大图的点击
  */
 public class OnPicClickListener implements View.OnClickListener {
-    private AppCompatActivity activity;
+    private Activity activity;
 
-    public OnPicClickListener(AppCompatActivity activity) {
+    public OnPicClickListener(Activity activity) {
         this.activity = activity;
     }
 

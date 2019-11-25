@@ -73,8 +73,8 @@ public class CommentBiz {
         return comment;
     }
 
-    public static void showComment(CommentViewHolder holder, Comment comment) {
-        Picasso.get().load(comment.getUser().getAvatar_large()).into(holder.civCommentUserAvatar);
+    public static void showComment(Activity activity, CommentViewHolder holder, Comment comment) {
+        Picasso.with(activity).load(comment.getUser().getAvatar_large()).into(holder.civCommentUserAvatar);
         holder.tvCommentUser.setText(comment.getUser().getName());
         try {
             holder.tvCommentCreateAt.setText(StringUtil.getReadableTime(comment.getCreated_at()));

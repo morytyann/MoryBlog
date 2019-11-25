@@ -25,8 +25,8 @@ public class PhotoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo, container, false);
-        PhotoView ivPhoto = (PhotoView) v.findViewById(R.id.ivPhoto);
-        GifImageView givGifPhoto = (GifImageView) v.findViewById(R.id.givGifPhoto);
+        PhotoView ivPhoto = v.findViewById(R.id.ivPhoto);
+        GifImageView givGifPhoto = v.findViewById(R.id.givGifPhoto);
         // 是Gif时加载Gif，不是则按普通方式加载。
         if (pic_url.endsWith(".gif")) {
             ivPhoto.setVisibility(View.GONE);
