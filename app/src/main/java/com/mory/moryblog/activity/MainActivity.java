@@ -2,12 +2,10 @@ package com.mory.moryblog.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,24 +20,28 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.mory.moryblog.App;
 import com.mory.moryblog.R;
 import com.mory.moryblog.adapter.WeiboAdapter;
-import com.mory.moryblog.biz.WeiboBiz;
+import com.mory.moryblog.entity.Timeline;
 import com.mory.moryblog.entity.Weibo;
-import com.mory.moryblog.listener.MyAuthListener;
 import com.mory.moryblog.util.Constant;
 import com.mory.moryblog.util.SettingKeeper;
+import com.mory.moryblog.util.TextUtil;
 import com.sina.weibo.sdk.auth.AuthInfo;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
+import com.sina.weibo.sdk.auth.WeiboAuthListener;
 import com.sina.weibo.sdk.auth.sso.SsoHandler;
+import com.sina.weibo.sdk.exception.WeiboException;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, WeiboAuthListener {
 
     private DrawerLayout drawer;
     private SwipeRefreshLayout srl;
@@ -47,24 +49,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SsoHandler ssoHandler;
     private WeiboAdapter rvAdapter;
     private LinearLayoutManager manager;
+    private Oauth2AccessToken oauth2AccessToken;
+    private List<Weibo> weiboList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setViews();
-        if (SettingKeeper.readAccessToken(this).getToken().equals("")) {
+
+        initViews();
+        Oauth2AccessToken oauth2AccessToken = SettingKeeper.readAccessToken();
+        if ("".equals(oauth2AccessToken.getToken())) {
             oAuth();
         } else {
-            Log.d(Constant.TAG, "onCreate: " + SettingKeeper.readAccessToken(this).getToken());
-            initWeiboList();
+            this.oauth2AccessToken = oauth2AccessToken;
+            loadWeibo(true, false, 0);
         }
     }
 
     /**
      * 初始化界面
      */
-    private void setViews() {
+    private void initViews() {
         // findViewById
         Toolbar toolbar = findViewById(R.id.toolbarMain);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -94,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    doRefreshLoadNew();
+                    loadWeibo(false, true, 0);
                 }
             });
         }
@@ -110,83 +116,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void oAuth() {
         AuthInfo authInfo = new AuthInfo(this, Constant.APP_KEY, Constant.REDIRECT_URL, Constant.SCOPE);
         ssoHandler = new SsoHandler(this, authInfo);
-        ssoHandler.authorize(new MyAuthListener(this));
+        ssoHandler.authorize(this);
     }
 
     /**
-     * 初始化微博列表
+     * 加载微博方法
+     *
+     * @param reload    是否重载
+     * @param loadNew   是否请求更新的
+     * @param weiboType 微博类型 0 全部
      */
-    public void initWeiboList() {
-        Observable.create(new Observable.OnSubscribe<ArrayList<Weibo>>() {
-            @Override
-            public void call(Subscriber<? super ArrayList<Weibo>> subscriber) {
-                subscriber.onNext(WeiboBiz.loadWeibo(MainActivity.this));
-                subscriber.onCompleted();
+    private void loadWeibo(boolean reload, boolean loadNew, int weiboType) {
+        String accessToken = oauth2AccessToken.getToken();
+        if (weiboList == null) {
+            weiboList = new ArrayList<>();
+        }
+        reload = weiboList.isEmpty() || reload;
+        long sinceId = 0L;
+        long maxId = 0L;
+        if (!reload) {
+            if (loadNew) {
+                Weibo weibo = weiboList.get(0);
+                sinceId = weibo.getId();
+            } else {
+                Weibo weibo = weiboList.get(weiboList.size() - 1);
+                maxId = weibo.getId();
             }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<ArrayList<Weibo>>() {
+        }
+        App.weiboApi.homeTimeline(accessToken, sinceId, maxId, weiboType, 0).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<Timeline>() {
             @Override
             public void onCompleted() {
-                Constant.IS_FRESHING = false;
-                MainActivity.this.rvAdapter = new WeiboAdapter(MainActivity.this, manager, srl, Constant.weibos, R.layout.list_item_weibo);
-                MainActivity.this.rvWeibos.setAdapter(MainActivity.this.rvAdapter);
+                TextUtil.changeNow();
+                MainActivity.this.initRecyclerView();
             }
 
             @Override
             public void onError(Throwable e) {
-                Constant.IS_FRESHING = false;
-                Toast.makeText(MainActivity.this, "出错啦，错误代码:" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("MoryBlog", "onError: ", e);
             }
 
             @Override
-            public void onNext(ArrayList<Weibo> weibos) {
-                Constant.weibos = new ArrayList<>();
-                Constant.weibos.addAll(weibos);
+            public void onNext(Timeline timeline) {
+                MainActivity.this.weiboList.addAll(timeline.getStatuses());
             }
         });
     }
 
-    /**
-     * 完成加载新微博的业务
-     */
-    private void doRefreshLoadNew() {
-        Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
-                subscriber.onNext(WeiboBiz.refreshWeibo(MainActivity.this, Constant.TYPE_LOAD_NEW));
-                subscriber.onCompleted();
-            }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<Integer>() {
-            @Override
-            public void onCompleted() {
-                Constant.IS_FRESHING = false;
-                srl.setRefreshing(false);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Constant.IS_FRESHING = false;
-                srl.setRefreshing(false);
-                Toast.makeText(MainActivity.this, "出错啦，错误信息：" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNext(Integer integer) {
-                switch (integer) {
-                    case Constant.FRESH_SUCCESS: // 刷新成功
-                        rvAdapter.notifyDataSetChanged();
-                        break;
-                    case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
-                        Toast.makeText(MainActivity.this, "没有新微博了", Toast.LENGTH_SHORT).show();
-                        break;
-                    case Constant.FRESH_FAILED: // 刷新失败
-                        Toast.makeText(MainActivity.this, "刷新失败", Toast.LENGTH_SHORT).show();
-                        break;
-                    case Constant.FRESHING: // 正在刷新
-                        Toast.makeText(MainActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        });
+    private void initRecyclerView() {
+        rvAdapter = new WeiboAdapter(this, manager, srl, weiboList, R.layout.list_item_weibo);
+        rvWeibos.setAdapter(this.rvAdapter);
     }
 
     @Override
@@ -242,18 +220,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             // 如果当前位置不是最上方则滚动到最上方，是的话加载新微博
             case R.id.toolbarMain:
-                if (manager.findFirstCompletelyVisibleItemPosition() == 0) {
-                    srl.setRefreshing(true);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            doRefreshLoadNew();
-                        }
-                    }, 1000);
+                if (manager.findFirstCompletelyVisibleItemPosition() != 0) {
+                    manager.smoothScrollToPosition(rvWeibos, null, 0);
                     return;
                 }
-                manager.smoothScrollToPosition(rvWeibos, null, 0);
+                srl.setRefreshing(true);
+                loadWeibo(false, true, 0);
                 break;
         }
     }
+
+    @Override
+    public void onComplete(Bundle bundle) {
+        oauth2AccessToken = Oauth2AccessToken.parseAccessToken(bundle);
+        if (oauth2AccessToken.isSessionValid()) {
+            SettingKeeper.writeAccessToken(oauth2AccessToken);
+            loadWeibo(true, false, 0);
+        } else {
+            String code = bundle.getString("code");
+            Log.e("MoryBlog", "session失效，错误码" + code);
+        }
+    }
+
+    @Override
+    public void onWeiboException(WeiboException e) {
+        Log.e("MoryBlog", "oAuth异常", e);
+    }
+
+    @Override
+    public void onCancel() {
+        Log.i("MoryBlog", "onCancel: ");
+    }
+
 }

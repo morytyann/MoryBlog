@@ -16,6 +16,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * 持有评论View的所有子View
  */
 public class CommentViewHolder extends RecyclerView.ViewHolder {
+
     public CircleImageView civCommentUserAvatar;
     public TextView tvCommentUser;
     public TextView tvCommentCreateAt;
@@ -24,10 +25,12 @@ public class CommentViewHolder extends RecyclerView.ViewHolder {
 
     public CommentViewHolder(View itemView) {
         super(itemView);
+
         civCommentUserAvatar = itemView.findViewById(R.id.civCommentUserAvatar);
         tvCommentUser = itemView.findViewById(R.id.tvCommentUser);
         tvCommentCreateAt = itemView.findViewById(R.id.tvCommentCreateAt);
         ibCommentShowMenu = itemView.findViewById(R.id.ibCommentShowMenu);
         tvCommentText = itemView.findViewById(R.id.tvCommentText);
     }
+
 }

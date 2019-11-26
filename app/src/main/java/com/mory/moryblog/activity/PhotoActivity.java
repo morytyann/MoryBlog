@@ -14,10 +14,11 @@ import com.mory.moryblog.adapter.FragmentAdapter;
 import com.mory.moryblog.fragment.PhotoFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PhotoActivity extends AppCompatActivity {
 
-    private ArrayList<String> pic_urls;
+    private List<String> pic_urls;
     private int position;
     private ViewPager vpPics;
 
@@ -39,7 +40,7 @@ public class PhotoActivity extends AppCompatActivity {
     }
 
     private void init() {
-        ArrayList<Fragment> fragments = new ArrayList<>();
+        List<Fragment> fragments = new ArrayList<>();
         for (int i = 0; i < pic_urls.size(); i++) {
             fragments.add(PhotoFragment.newInstance(pic_urls.get(i)));
         }
@@ -49,7 +50,7 @@ public class PhotoActivity extends AppCompatActivity {
 
     private void getData() {
         Intent i = getIntent();
-        pic_urls = i.getStringArrayListExtra("pic_urls");
+        pic_urls = i.getStringArrayListExtra("picUrls");
         position = i.getIntExtra("position", 0);
     }
 }

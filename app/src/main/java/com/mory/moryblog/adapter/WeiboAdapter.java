@@ -7,19 +7,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.mory.moryblog.App;
 import com.mory.moryblog.activity.MainActivity;
 import com.mory.moryblog.activity.WeiboDetailActivity;
 import com.mory.moryblog.biz.WeiboBiz;
+import com.mory.moryblog.entity.Timeline;
 import com.mory.moryblog.entity.Weibo;
-import com.mory.moryblog.util.Constant;
+import com.mory.moryblog.util.SettingKeeper;
+import com.mory.moryblog.util.TextUtil;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -29,15 +32,16 @@ import rx.schedulers.Schedulers;
  * 自定义adapter 用于显示微博列表
  */
 public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
+
     private MainActivity activity;
     private LinearLayoutManager manager;
     private SwipeRefreshLayout srl;
     private LayoutInflater inflater;
-    private ArrayList<Weibo> weibos;
+    private List<Weibo> weiboList;
     private int resource;
 
-    public WeiboAdapter(MainActivity activity, LinearLayoutManager manager, SwipeRefreshLayout srl, ArrayList<Weibo> weibos, int resource) {
-        this.weibos = weibos;
+    public WeiboAdapter(MainActivity activity, LinearLayoutManager manager, SwipeRefreshLayout srl, List<Weibo> weiboList, int resource) {
+        this.weiboList = weiboList;
         this.resource = resource;
         this.manager = manager;
         this.srl = srl;
@@ -47,7 +51,7 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
 
     @Override
     public int getItemCount() {
-        return weibos.size();
+        return weiboList.size();
     }
 
     /**
@@ -57,8 +61,9 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
      * @param viewType 不知道...目测是可以根据viewType返回不同的holder
      * @return ViewHolder对象
      */
+    @NonNull
     @Override
-    public WeiboViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public WeiboViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(resource, parent, false);
         return new WeiboViewHolder(view);
     }
@@ -74,11 +79,11 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.startActivity(new Intent(activity, WeiboDetailActivity.class).putExtra("position", position));
+                activity.startActivity(new Intent(activity, WeiboDetailActivity.class).putExtra("weibo", weiboList.get(position)));
             }
         });
-        WeiboBiz.showWeibo(activity, weibos.get(position), holder, position);
-        if (manager.findLastVisibleItemPosition() == getItemCount() - 2 && !Constant.IS_FRESHING) {
+        WeiboBiz.showWeibo(activity, weiboList.get(position), holder, position);
+        if (manager.findLastVisibleItemPosition() == getItemCount() - 2 && !srl.isRefreshing()) {
             srl.setRefreshing(true);
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -93,44 +98,32 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboViewHolder> {
      * 完成加载更多微博的业务
      */
     private void doRefreshLoadMore() {
-        Observable.create(new Observable.OnSubscribe<Integer>() {
+        String accessToken = SettingKeeper.readAccessToken().getToken();
+        Weibo weibo = weiboList.get(weiboList.size() - 1);
+        App.weiboApi.homeTimeline(accessToken, 0L, weibo.getId(), 0, 0).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Subscriber<Timeline>() {
             @Override
-            public void call(Subscriber<? super Integer> subscriber) {
-                subscriber.onNext(WeiboBiz.refreshWeibo(activity, Constant.TYPE_LOAD_MORE));
-                subscriber.onCompleted();
+            public void onCompleted() {
+                TextUtil.changeNow();
+                srl.setRefreshing(false);
+                notifyDataSetChanged();
             }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<Integer>() {
-                    @Override
-                    public void onCompleted() {
-                        Constant.IS_FRESHING = false;
-                        srl.setRefreshing(false);
-                    }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Constant.IS_FRESHING = false;
-                        srl.setRefreshing(false);
-                        Toast.makeText(activity, "出错啦，错误信息：" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onError(Throwable e) {
+                srl.setRefreshing(false);
+                Toast.makeText(activity, "出错啦，错误信息：" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onNext(Integer integer) {
-                        switch (integer) {
-                            case Constant.FRESH_SUCCESS: // 刷新成功
-                                notifyDataSetChanged();
-                                break;
-                            case Constant.FRESH_NO_NEW: // 刷新成功但没有新微博
-                                Toast.makeText(activity, "没有更多微博了", Toast.LENGTH_SHORT).show();
-                                break;
-                            case Constant.FRESH_FAILED: // 刷新失败
-                                Toast.makeText(activity, "刷新失败", Toast.LENGTH_SHORT).show();
-                                break;
-                            case Constant.FRESHING: // 正在刷新
-                                Toast.makeText(activity, "正在刷新...", Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-                    }
-                });
+            @Override
+            public void onNext(Timeline timeline) {
+                List<Weibo> statuses = timeline.getStatuses();
+                if (statuses.isEmpty()) {
+                    Toast.makeText(activity, "没有更多微博了", Toast.LENGTH_SHORT).show();
+                } else {
+                    weiboList.addAll(statuses);
+                }
+            }
+        });
     }
+
 }

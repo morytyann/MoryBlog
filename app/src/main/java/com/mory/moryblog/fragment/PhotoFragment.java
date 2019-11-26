@@ -33,8 +33,8 @@ public class PhotoFragment extends Fragment {
             givGifPhoto.setVisibility(View.VISIBLE);
             ImageUtil.showGif(getActivity(), pic_url, givGifPhoto);
         } else {
-            ivPhoto.setVisibility(View.VISIBLE);
             givGifPhoto.setVisibility(View.GONE);
+            ivPhoto.setVisibility(View.VISIBLE);
             ImageUtil.showPhoto(getActivity(), pic_url, ivPhoto);
         }
         return v;

@@ -24,6 +24,6 @@ public class OnPicClickListener implements View.OnClickListener {
     public void onClick(View v) {
         ArrayList<String> pic_urls = (ArrayList<String>) v.getTag(R.id.tag0);
         int position = (int) v.getTag(R.id.tag1);
-        activity.startActivity(new Intent(activity, PhotoActivity.class).putExtra("position", position).putStringArrayListExtra("pic_urls", pic_urls));
+        activity.startActivity(new Intent(activity, PhotoActivity.class).putExtra("position", position).putStringArrayListExtra("picUrls", pic_urls));
     }
 }

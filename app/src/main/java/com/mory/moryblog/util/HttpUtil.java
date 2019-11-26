@@ -19,7 +19,7 @@ public class HttpUtil {
         InputStream is = connection.getInputStream();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
-        int len = 0;
+        int len;
         while ((len = is.read(buffer)) != -1) {
             bos.write(buffer, 0, len);
         }

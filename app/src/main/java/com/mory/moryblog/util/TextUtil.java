@@ -1,27 +1,27 @@
 package com.mory.moryblog.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 /**
  * Created by Mory on 2016/3/29.
- * 字符串工具类
- * 格式化时间
- * 提供可读的文本
+ * <p>
+ * 文本工具类
  */
-public class StringUtil {
+public class TextUtil {
     private static SimpleDateFormat format = new SimpleDateFormat("MM月dd日 HH:mm", Locale.CHINA);
-    private static SimpleDateFormat parse = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);
     private static SimpleDateFormat shortFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
-    private static Date date0;
+    private static Date now;
 
-    public static String getReadableTime(String time) throws ParseException {
-        Date date = parse.parse(time);
-        long timeLag = date0.getTime() - date.getTime();
-        long minute = (timeLag / 60000) + 1;
-        long day = timeLag / 60000 / 60 / 24;
+    public static void changeNow() {
+        now = new Date();
+    }
+
+    public static String getReadableTime(Date date) {
+        long timeLag = now.getTime() - date.getTime();
+        long minute = (timeLag / 1000 / 60) + 1;
+        long day = timeLag / 1000 / 60 / 60 / 24;
         if (minute < 60) {
             return minute + "分钟前";
         } else {
@@ -36,9 +36,5 @@ public class StringUtil {
                     return format.format(date);
             }
         }
-    }
-
-    public static void init() {
-        date0 = new Date();
     }
 }

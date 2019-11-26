@@ -18,6 +18,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * 持有微博View的所有子View
  */
 public class WeiboViewHolder extends RecyclerView.ViewHolder {
+
     public CircleImageView civUserAvatar;
     public TextView tvUserName;
     public TextView tvCreateAt;
@@ -52,4 +53,5 @@ public class WeiboViewHolder extends RecyclerView.ViewHolder {
         llContent = itemView.findViewById(R.id.llContent);
         this.itemView = itemView;
     }
+
 }
