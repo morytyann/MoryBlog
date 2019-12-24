@@ -1,10 +1,5 @@
 package com.mory.moryblog.util;
 
-import com.mory.moryblog.entity.Weibo;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Mory on 2016/3/28.
  * 常量类
@@ -34,8 +29,4 @@ public interface Constant {
      */
     String TAG = "MoryBlog";
 
-    /**
-     * 微博列表
-     */
-    List<Weibo> WEIBOS = new ArrayList<>();
 }
